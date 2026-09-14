@@ -1,0 +1,10 @@
+/* Everything from the design's <style> block except the @keyframes — all
+   fourteen of those now live in framer-motion (see src/motion/presets.js). */
+*, *::before, *::after { box-sizing: border-box; }
+h1, h2, h3 { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+html { scroll-behavior: smooth; background: #000000; }
+body { margin: 0; background: #000000; }
+a { color: #ffb829; text-decoration: none; }
+a:hover { color: #ffffff; }
+::selection { background: rgba(128, 82, 255, 0.45); }
+:focus-visible { outline: 2px solid #8052ff; outline-offset: 3px; }

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500&display=swap">
+<script src="./image-slot.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+h1, h2, h3 { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+html { scroll-behavior: smooth; background: #000000; }
+body { margin: 0; background: #000000; }
+a { color: #ffb829; text-decoration: none; }
+a:hover { color: #ffffff; }
+::selection { background: rgba(128, 82, 255, 0.45); }
+:focus-visible { outline: 2px solid #8052ff; outline-offset: 3px; }
+@keyframes twk { from { opacity: 0.12; } to { opacity: 0.95; } }
+@keyframes drift { from { transform: translate(-1.6%, 1.2%) scale(0.99); } to { transform: translate(1.6%, -1.2%) scale(1.02); } }
+@keyframes driftB { from { transform: translate(1.2%, -0.8%); } to { transform: translate(-1.2%, 0.8%); } }
+@keyframes enLA { from { opacity: 0; transform: translateX(-56px); } to { opacity: 1; transform: none; } }
+@keyframes enLB { from { opacity: 0; transform: translateX(-56px); } to { opacity: 1; transform: none; } }
+@keyframes enRA { from { opacity: 0; transform: translateX(56px); } to { opacity: 1; transform: none; } }
+@keyframes enRB { from { opacity: 0; transform: translateX(56px); } to { opacity: 1; transform: none; } }
+@keyframes swRLA { 0% { transform: translateX(100%); opacity: 0; } 16% { opacity: 1; } 84% { opacity: 1; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes swRLB { 0% { transform: translateX(100%); opacity: 0; } 16% { opacity: 1; } 84% { opacity: 1; } 100% { transform: translateX(-100%); opacity: 0; } }
+@keyframes swLRA { 0% { transform: translateX(-100%); opacity: 0; } 16% { opacity: 1; } 84% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+@keyframes swLRB { 0% { transform: translateX(-100%); opacity: 0; } 16% { opacity: 1; } 84% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+@keyframes cue { 0%, 100% { transform: translateY(0); opacity: 0.45; } 50% { transform: translateY(8px); opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes brk { from { opacity: 0; transform: scale(1.5); } to { opacity: 1; transform: none; } }
+@keyframes brkPulse { 0%, 100% { opacity: 0.75; } 50% { opacity: 0.3; } }
+@keyframes rule { 0% { transform: scaleX(0.2); opacity: 0.4; } 50% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0.2); opacity: 0.4; } }
+@keyframes ctaGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(128,82,255,0.5); } 50% { box-shadow: 0 0 0 14px rgba(128,82,255,0); } }
+</style>
+</helmet>
+
+<div style="position: relative; background: #000000; color: #ffffff; font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif; min-height: 100vh;">
+
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none;">
+    <canvas ref="{{ armRef }}" style="width: 100%; height: 100%; display: block;"></canvas>
+  </div>
+
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.16;">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
+      <g style="animation: 34s ease-in-out infinite alternate driftB;">
+        <sc-for list="{{ ambientA }}" as="ap" hint-placeholder-count="60">
+          <polygon points="{{ ap.pts }}" fill="none" stroke="{{ ap.c }}" stroke-width="0.14" style="animation: {{ ap.a }};"></polygon>
+        </sc-for>
+      </g>
+      <g style="animation: 21s ease-in-out infinite alternate drift; transform-origin: 50% 50%;">
+        <sc-for list="{{ ambientB }}" as="bp" hint-placeholder-count="50">
+          <polygon points="{{ bp.pts }}" fill="none" stroke="{{ bp.c }}" stroke-width="0.2" style="animation: {{ bp.a }};"></polygon>
+        </sc-for>
+      </g>
+    </svg>
+  </div>
+
+  <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: flex; align-items: center; gap: 24px; padding: 22px 36px; background: linear-gradient(#000000 55%, rgba(0,0,0,0));">
+    <div style="display: flex; align-items: center; gap: 10px; margin-right: auto;">
+      <svg width="16" height="16" viewBox="0 0 16 16" style="display: block;"><polygon points="8,1 15,14 1,14" fill="#8052ff"></polygon></svg>
+      <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase;">{{ teamName }}</span>
+    </div>
+    <a href="#team" style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a;" style-hover="color: #ffffff;">Team</a>
+    <a href="#capabilities" style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a;" style-hover="color: #ffffff;">Capabilities</a>
+    <a href="#stack" style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a;" style-hover="color: #ffffff;">Stack</a>
+    <a href="#contact" style="background: #8052ff; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; padding: 14px 18px; border-radius: 24px; line-height: 1;" style-hover="background: #6f3ff5; color: #ffffff;">Contact us</a>
+  </div>
+
+  <section data-screen-label="Capstone" style="position: relative; z-index: 1; min-height: 100vh; scroll-snap-align: start; display: grid; grid-template-rows: 1fr auto; gap: 18px; padding: clamp(100px, 15vh, 120px) 36px 28px; max-width: 1280px; margin: 0 auto;">
+    <div style="position: absolute; inset: 104px 30px 30px; pointer-events: none;">
+      <span style="position: absolute; top: 0; left: 0; width: 26px; height: 26px; border-left: 1px solid #8052ff; border-top: 1px solid #8052ff; transform-origin: top left; animation: 700ms cubic-bezier(.16,.84,.24,1) both brk, 4.5s 700ms ease-in-out infinite brkPulse;"></span>
+      <span style="position: absolute; top: 0; right: 0; width: 26px; height: 26px; border-right: 1px solid #8052ff; border-top: 1px solid #8052ff; transform-origin: top right; animation: 700ms 120ms cubic-bezier(.16,.84,.24,1) both brk, 4.5s 1s ease-in-out infinite brkPulse;"></span>
+      <span style="position: absolute; bottom: 0; left: 0; width: 26px; height: 26px; border-left: 1px solid #8052ff; border-bottom: 1px solid #8052ff; transform-origin: bottom left; animation: 700ms 240ms cubic-bezier(.16,.84,.24,1) both brk, 4.5s 1.4s ease-in-out infinite brkPulse;"></span>
+      <span style="position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-right: 1px solid #8052ff; border-bottom: 1px solid #8052ff; transform-origin: bottom right; animation: 700ms 360ms cubic-bezier(.16,.84,.24,1) both brk, 4.5s 1.8s ease-in-out infinite brkPulse;"></span>
+    </div>
+    <div style="display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 60px; align-items: center;">
+      <div style="animation: 800ms cubic-bezier(.16,.84,.24,1) both rise;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: clamp(16px, 3.4vh, 30px);">
+          <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #ffb829;">Capstone · 2026</span>
+          <span style="height: 1px; width: 90px; background: #ffb829; transform-origin: left; animation: 5s ease-in-out infinite rule;"></span>
+        </div>
+        <h1 style="font-size: clamp(56px, 8vw, 113px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; margin: 0 0 clamp(16px, 3.2vh, 30px);">Capstone</h1>
+        <p style="font-size: 18px; font-weight: 300; line-height: 1.55; color: #ffffff; max-width: 480px; margin: 0 0 clamp(18px, 3.4vh, 36px);">Seven engineers, one build team. We are looking for an industry partner with an automation problem worth solving, and we will solve it end to end.</p>
+        <a href="#contact" style="display: inline-block; background: #8052ff; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; padding: 15px 18px; border-radius: 24px; line-height: 1; animation: 3.4s ease-out infinite ctaGlow;" style-hover="background: #6f3ff5; color: #ffffff;">Bring us a problem</a>
+        <div ref="{{ axisRef }}" style="margin-top: clamp(12px, 2.4vh, 26px); font-size: 12px; line-height: 1.5; letter-spacing: 0.35px; color: #9a9a9a; font-variant-numeric: tabular-nums; white-space: pre;">AXIS 01   0.0°   AXIS 02   0.0°   AXIS 03   0.0°</div>
+      </div>
+<div></div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; line-height: 1.5; color: #9a9a9a;">
+      <span>Scroll for the team</span>
+      <span style="display: inline-block; animation: 1.8s ease-in-out infinite cue;">↓</span>
+      <span>Industrial automation · Robotics</span>
+    </div>
+  </section>
+
+  <section id="team" style="position: relative; z-index: 1;">
+    <div data-screen-label="Team stage" style="position: sticky; top: 0; height: 100vh; z-index: 1; overflow: hidden; display: grid; align-content: center; padding: clamp(80px, 11vh, 110px) 36px 40px;">
+
+      <div style="position: absolute; inset: 0; pointer-events: none; overflow: hidden;">
+        <div style="position: absolute; left: 0; right: 0; top: 22%; height: 1px; background: #8052ff; animation: 1100ms cubic-bezier(.35,.65,.25,1) both {{ lineAnim }};"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #ffb829; animation: 1100ms 110ms cubic-bezier(.35,.65,.25,1) both {{ lineAnim }};"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 78%; height: 1px; background: #8052ff; animation: 1100ms 220ms cubic-bezier(.35,.65,.25,1) both {{ lineAnim }};"></div>
+      </div>
+
+      <div style="position: relative; display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr) 40px; gap: clamp(28px, 4vw, 60px); align-items: center; max-width: 1280px; width: 100%; margin: 0 auto;">
+
+        <div style="order: {{ memberOrder }};">
+          <div style="display: grid; gap: clamp(14px, 2.4vh, 24px); animation: 640ms cubic-bezier(.16,.84,.24,1) both {{ enterAnim }};">
+            <div style="position: relative; height: clamp(150px, 32vh, 380px); aspect-ratio: 4 / 5; max-width: 100%;">
+              <sc-for list="{{ portraits }}" as="por" hint-placeholder-count="7">
+                <div style="position: absolute; inset: 0; transition: opacity 400ms ease; opacity: {{ por.op }}; pointer-events: {{ por.pe }};">
+                  <image-slot id="{{ por.id }}" shape="rounded" radius="24" placeholder="{{ por.ph }}"></image-slot>
+                </div>
+              </sc-for>
+            </div>
+            <div>
+              <div style="font-size: 12px; line-height: 1.5; letter-spacing: 0.35px; text-transform: uppercase; color: #8052ff; margin-bottom: 12px;">{{ member.num }} · {{ member.role }}</div>
+              <h2 style="font-size: clamp(32px, min(5.4vw, 8.4vh), 78px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; margin: 0 0 14px;">{{ member.name }}</h2>
+              <p style="font-size: clamp(15px, 1.9vh, 18px); font-weight: 300; line-height: 1.55; color: #bdbdbd; max-width: 460px; margin: 0 0 14px;">{{ member.line }}</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a;">
+                <sc-for list="{{ member.chips }}" as="chip" hint-placeholder-count="3">
+                  <span>{{ chip }}</span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="order: {{ panelOrder }};">
+          <div style="animation: 640ms 90ms cubic-bezier(.16,.84,.24,1) both {{ panelAnim }};">
+            <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #ffb829; margin-bottom: 14px;">Project · {{ project.code }} · placeholder</div>
+            <h3 style="font-size: clamp(24px, min(3.2vw, 5vh), 42px); line-height: 1.2; letter-spacing: -0.022em; font-weight: 400; margin: 0 0 18px;">{{ project.title }}</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px;">
+              <sc-for list="{{ shots }}" as="sht" hint-placeholder-count="3">
+                <div style="position: relative; aspect-ratio: 4 / 3;">
+                  <sc-for list="{{ sht.layers }}" as="lyr" hint-placeholder-count="7">
+                    <div style="position: absolute; inset: 0; transition: opacity 400ms ease; opacity: {{ lyr.op }}; pointer-events: {{ lyr.pe }};">
+                      <image-slot id="{{ lyr.id }}" shape="rounded" radius="24" placeholder="{{ lyr.ph }}"></image-slot>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: grid; gap: 12px; max-width: 520px;">
+              <div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 18px; font-size: 15px; font-weight: 300; line-height: 1.55;"><span style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a; font-weight: 400;">Scope</span><span style="color: #ffffff;">{{ project.scope }}</span></div>
+              <div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 18px; font-size: 15px; font-weight: 300; line-height: 1.55;"><span style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a; font-weight: 400;">Stack</span><span style="color: #ffffff;">{{ project.stack }}</span></div>
+              <div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 18px; font-size: 15px; font-weight: 300; line-height: 1.55;"><span style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a; font-weight: 400;">Result</span><span style="color: #bdbdbd;">{{ project.result }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="order: 3; display: grid; gap: 4px; justify-items: center;">
+          <sc-for list="{{ roster }}" as="r" hint-placeholder-count="7">
+            <button type="button" onClick="{{ r.go }}" title="{{ r.name }}" aria-label="{{ r.name }}" style="width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center;" style-hover="opacity: 0.75;">
+              <span style="width: 10px; height: 10px; border-radius: 9999px; background: {{ r.dot }}; transform: scale({{ r.scale }}); transition: background 300ms ease, transform 300ms ease;"></span>
+            </button>
+          </sc-for>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="margin-top: -100vh; position: relative; z-index: 0;">
+      <sc-for list="{{ triggers }}" as="t" hint-placeholder-count="7">
+        <div ref="{{ t.ref }}" style="height: 100vh; scroll-snap-align: start; pointer-events: none;"></div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="capabilities" data-screen-label="Capabilities" style="position: relative; z-index: 1; min-height: 100vh; scroll-snap-align: start; display: grid; align-content: center; gap: clamp(28px, 5vh, 60px); padding: clamp(88px, 13vh, 120px) 36px clamp(36px, 6vh, 60px); max-width: 1280px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 60px; align-items: start;">
+      <div>
+        <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #ffb829; margin-bottom: 24px;">What we do</div>
+        <h2 style="font-size: clamp(40px, 5.2vw, 78px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; margin: 0;">Capabilities</h2>
+      </div>
+      <p style="font-size: 18px; font-weight: 300; line-height: 1.55; color: #bdbdbd; max-width: 520px; margin: 0; align-self: end;">One team covers the full path from a plant-floor problem to a commissioned cell. No handoffs between vendors, no gaps in the middle.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 4vh, 60px) 36px;">
+      <sc-for list="{{ capabilities }}" as="c" hint-placeholder-count="6">
+        <div style="display: grid; gap: 12px; align-content: start;">
+          <div style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #8052ff;">{{ c.num }}</div>
+          <div style="font-size: clamp(19px, 2.6vh, 24px); line-height: 1.25; letter-spacing: -0.48px; font-weight: 400;">{{ c.title }}</div>
+          <div style="font-size: clamp(15px, 1.9vh, 18px); font-weight: 300; line-height: 1.55; color: #9a9a9a;">{{ c.body }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="stack" data-screen-label="Stack" style="position: relative; z-index: 1; min-height: 100vh; scroll-snap-align: start; display: grid; align-content: center; gap: 60px; padding: 120px 36px 60px; max-width: 1280px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 60px; align-items: end;">
+      <div>
+        <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #ffb829; margin-bottom: 24px;">What we work in</div>
+        <h2 style="font-size: clamp(40px, 5.2vw, 78px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; margin: 0;">Tools &amp; stack</h2>
+      </div>
+      <p style="font-size: 18px; font-weight: 300; line-height: 1.55; color: #bdbdbd; max-width: 520px; margin: 0;">Placeholder list. Trim it to what the team can defend in a room.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 36px;">
+      <sc-for list="{{ stack }}" as="s" hint-placeholder-count="5">
+        <div style="display: grid; gap: 18px; align-content: start;">
+          <div style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #8052ff;">{{ s.group }}</div>
+          <div style="display: grid; gap: 6px;">
+            <sc-for list="{{ s.items }}" as="i" hint-placeholder-count="4">
+              <div style="font-size: 18px; font-weight: 300; line-height: 1.55; color: #ffffff;">{{ i }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="contact" data-screen-label="Contact" style="position: relative; z-index: 1; min-height: 100vh; scroll-snap-align: start; display: grid; grid-template-rows: 1fr auto; gap: 36px; padding: 120px 36px 36px; max-width: 1280px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 60px; align-items: center;">
+      <div>
+        <div style="font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; color: #ffb829; margin-bottom: 30px;">Contact</div>
+        <h2 style="font-size: clamp(44px, 6.4vw, 96px); line-height: 1.05; letter-spacing: -0.022em; font-weight: 400; margin: 0 0 30px;">Bring us a problem</h2>
+        <p style="font-size: 18px; font-weight: 300; line-height: 1.55; color: #bdbdbd; max-width: 480px; margin: 0 0 36px;">Tell us where the line slows down, what fails inspection, or what still runs by hand. We will scope it, build it, and hand it over working.</p>
+        <a href="mailto:team@example.edu" style="display: inline-block; background: #8052ff; color: #ffffff; font-size: 14px; font-weight: 600; letter-spacing: 0.35px; text-transform: uppercase; padding: 15px 18px; border-radius: 24px; line-height: 1;" style-hover="background: #6f3ff5; color: #ffffff;">team@example.edu</a>
+      </div>
+      <div style="display: grid; gap: 18px;">
+        <div style="font-size: 12px; letter-spacing: 0.35px; text-transform: uppercase; color: #9a9a9a;">The team</div>
+        <sc-for list="{{ members }}" as="m" hint-placeholder-count="7">
+          <div style="display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 18px; align-items: baseline;">
+            <span style="font-size: 12px; color: #8052ff;">{{ m.num }}</span>
+            <span style="font-size: 24px; line-height: 1.25; letter-spacing: -0.48px; font-weight: 400;">{{ m.name }} <span style="font-size: 14px; font-weight: 300; color: #9a9a9a;">{{ m.role }}</span></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; line-height: 1.5; color: #9a9a9a;">
+      <span>{{ teamName }}</span>
+      <span>Automation · Robotics · Capstone 2026</span>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;teamName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Capstone Team&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;snapScroll&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const MEMBERS = [
+  { name: "Tian Wen", role: "Hardware — Mechanical", line: "Designs the structure everything else bolts to, from concept to fabricated part.", chips: ["CAD & tolerancing", "Fabrication", "Mechanism design"],
+    project: { title: "Modular Gripper Assembly", scope: "End-effector for mixed-part handling", stack: "SolidWorks, 3D print, pneumatics", result: "Replace with a real outcome" } },
+  { name: "Jovyan", role: "AI / Software Engineer", line: "Turns models and logic into software that keeps running on the floor.", chips: ["Backend services", "Model deployment", "Data pipelines"],
+    project: { title: "Vision-Guided Pick & Place", scope: "Perception service driving a 6-axis arm", stack: "Python, ROS 2, OpenCV", result: "Replace with a real outcome" } },
+  { name: "Vincent Santosa", role: "Hardware — Electronics", line: "Power, sensing and control boards, from schematic through bring-up.", chips: ["Schematic & PCB", "Sensors", "Bring-up & test"],
+    project: { title: "Motor Drive & Sensor Board", scope: "Custom control board for a conveyor rig", stack: "KiCad, STM32, CAN", result: "Replace with a real outcome" } },
+  { name: "Davina Nadine", role: "Business Analyst / Systems Engineer", line: "Translates a plant problem into requirements the team can build against.", chips: ["Requirements", "Process mapping", "Cost & ROI"],
+    project: { title: "Line Throughput Study", scope: "Bottleneck analysis and automation case", stack: "Process mapping, discrete-event sim", result: "Replace with a real outcome" } },
+  { name: "Cliffton Owen", role: "AI / ML / Software Engineer", line: "Builds the perception and decision models, and the evidence that they work.", chips: ["Computer vision", "Model training", "Evaluation"],
+    project: { title: "Defect Detection Model", scope: "Inline visual inspection classifier", stack: "PyTorch, ONNX, edge GPU", result: "Replace with a real outcome" } },
+  { name: "Brian Wong", role: "Project Manager, UI/UX", line: "Keeps the schedule honest and the operator interface usable.", chips: ["Delivery", "Interface design", "Stakeholder comms"],
+    project: { title: "Operator Console", scope: "HMI for cell status and manual override", stack: "Figma, web HMI, MQTT", result: "Replace with a real outcome" } },
+  { name: "Wen Xuan", role: "Hardware — System Integration", line: "Makes the subsystems behave as one machine, safely.", chips: ["Integration", "Commissioning", "Safety & interlocks"],
+    project: { title: "Cell Integration & Commissioning", scope: "Bringing arm, vision and conveyor under one controller", stack: "PLC, Modbus TCP, safety relays", result: "Replace with a real outcome" } }
+];
+
+const CAPABILITIES = [
+  { title: "Automation feasibility", body: "We walk the process, map the steps, and say plainly what is worth automating and what is not." },
+  { title: "Mechanical design & build", body: "Fixtures, frames, end-effectors and mechanisms — designed, tolerance-checked and fabricated." },
+  { title: "Control electronics", body: "Sensing, drives and custom boards, specified or designed from scratch and bench-verified." },
+  { title: "Machine vision & ML", body: "Inspection, detection and guidance models trained on your parts, with measured accuracy." },
+  { title: "Software & integration", body: "The layer that ties PLC, robot, vision and data together, plus the operator interface." },
+  { title: "Commissioning & handover", body: "On-site bring-up, safety checks, documentation and training so it runs without us." }
+];
+
+const STACK = [
+  { group: "Mechanical", items: ["SolidWorks", "Fusion 360", "FDM / SLA printing", "CNC & sheet metal"] },
+  { group: "Electronics", items: ["KiCad", "STM32 / ESP32", "Sensor selection", "Bench validation"] },
+  { group: "Software & AI", items: ["Python", "PyTorch", "OpenCV", "ROS 2"] },
+  { group: "Controls", items: ["PLC ladder / ST", "Modbus TCP", "MQTT", "Industrial networking"] },
+  { group: "Delivery", items: ["Requirements docs", "Figma", "Jira", "Test & handover packs"] }
+];
+
+const PARTICLE_COLORS = ["#8052ff", "#ffb829", "#15846e", "#b39dff", "#4a6cf7", "#d75ec9", "#5ad1c8"];
+
+function rand(seed) {
+  let a = seed;
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function triangle(cx, cy, s, rot) {
+  const pts = [];
+  for (let k = 0; k < 3; k++) {
+    const a = rot + (k * 2 * Math.PI) / 3;
+    pts.push((cx + s * Math.cos(a)).toFixed(2) + "," + (cy + s * Math.sin(a)).toFixed(2));
+  }
+  return pts.join(" ");
+}
+
+function cloud(n, seed, mode) {
+  const r = rand(seed);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let cx, cy, s;
+    if (mode === "cloud") {
+      const ang = r() * Math.PI * 2;
+      const u = r();
+      const rad = 8 + 36 * Math.pow(u, 0.62) + (r() < 0.12 ? 10 * r() : 0);
+      cx = 50 + rad * Math.cos(ang) * 1.04;
+      cy = 50 + rad * Math.sin(ang) * 0.92;
+      s = 0.55 + r() * 1.25;
+    } else {
+      cx = r() * 100;
+      cy = r() * 100;
+      s = 0.4 + r() * 0.8;
+    }
+    out.push({
+      pts: triangle(cx, cy, s, r() * Math.PI * 2),
+      c: PARTICLE_COLORS[Math.floor(r() * PARTICLE_COLORS.length)],
+      a: (4 + r() * 7).toFixed(1) + "s ease-in-out " + (-r() * 9).toFixed(1) + "s infinite alternate twk"
+    });
+  }
+  return out;
+}
+
+const AMBIENT_A = cloud(64, 77341, "scatter");
+const AMBIENT_B = cloud(52, 424242, "scatter");
+
+function rot2(x, y, a) {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [x * c - y * s, x * s + y * c];
+}
+
+// ── wire models: edges, not surfaces ────────────────────────────────
+function boxEdges(w, h, d, ox, oy, oz, g, out) {
+  const X = w / 2, Y = h / 2, Z = d / 2, c = [];
+  for (let i = 0; i < 8; i++) c.push([ox + ((i & 1) ? X : -X), oy + ((i & 2) ? Y : -Y), oz + ((i & 4) ? Z : -Z)]);
+  const E = [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
+  for (let i = 0; i < E.length; i++) out.push({ a: c[E[i][0]], b: c[E[i][1]], g: g });
+}
+function ring(axis, radius, n, ox, oy, oz, g, out, prof) {
+  let prev = null;
+  for (let i = 0; i <= n; i++) {
+    const th = (i / n) * Math.PI * 2;
+    const rr = prof ? prof(th) : radius;
+    const c = Math.cos(th) * rr, s = Math.sin(th) * rr;
+    const p = axis === "y" ? [ox + c, oy, oz + s] : [ox + c, oy + s, oz];
+    if (prev) out.push({ a: prev, b: p, g: g });
+    prev = p;
+  }
+}
+function cylEdges(axis, radius, len, ox, oy, oz, g, out, n) {
+  n = n || 16;
+  if (axis === "y") {
+    ring("y", radius, n, ox, oy, oz, g, out);
+    ring("y", radius, n, ox, oy + len, oz, g, out);
+    for (let k = 0; k < 4; k++) {
+      const th = (k * Math.PI) / 2, c = Math.cos(th) * radius, s = Math.sin(th) * radius;
+      out.push({ a: [ox + c, oy, oz + s], b: [ox + c, oy + len, oz + s], g: g });
+    }
+  } else {
+    ring("z", radius, n, ox, oy, oz - len / 2, g, out);
+    ring("z", radius, n, ox, oy, oz + len / 2, g, out);
+    for (let k = 0; k < 4; k++) {
+      const th = (k * Math.PI) / 2, c = Math.cos(th) * radius, s = Math.sin(th) * radius;
+      out.push({ a: [ox + c, oy + s, oz - len / 2], b: [ox + c, oy + s, oz + len / 2], g: g });
+    }
+  }
+}
+
+// model 0 — six-axis arm. groups: 0 base, 1 upper arm, 2 forearm, 3 gripper
+function buildArmWire() {
+  const s = [];
+  cylEdges("y", 0.8, 0.07, 0, 0, 0, 0, s, 26);
+  cylEdges("y", 0.5, 0.44, 0, 0.07, 0, 0, s, 22);
+  boxEdges(0.56, 0.34, 0.54, 0, 0.68, 0, 0, s);
+  cylEdges("z", 0.3, 0.5, 0, 0.86, 0, 0, s, 18);
+  boxEdges(0.3, 1, 0.32, 0, 0.5, 0, 1, s);
+  cylEdges("z", 0.23, 0.36, 0, 1, 0, 1, s, 16);
+  boxEdges(0.26, 0.88, 0.28, 0, 0.44, 0, 2, s);
+  cylEdges("z", 0.17, 0.28, 0, 0.88, 0, 2, s, 14);
+  boxEdges(0.34, 0.22, 0.3, 0, 0.11, 0, 3, s);
+  for (let side = -1; side <= 1; side += 2) {
+    const rx = side * 0.15, ry = 0.22, aOut = side * 0.36, aIn = -side * 0.68;
+    const jaw = [];
+    boxEdges(0.1, 0.46, 0.18, 0, 0.23, 0, 3, jaw);
+    for (let i = 0; i < jaw.length; i++) {
+      const A = rot2(jaw[i].a[0], jaw[i].a[1], aOut), B = rot2(jaw[i].b[0], jaw[i].b[1], aOut);
+      s.push({ a: [rx + A[0], ry + A[1], jaw[i].a[2]], b: [rx + B[0], ry + B[1], jaw[i].b[2]], g: 3 });
+    }
+    const end = rot2(0, 0.46, aOut);
+    const tip = [];
+    boxEdges(0.09, 0.36, 0.16, 0, 0.18, 0, 3, tip);
+    for (let i = 0; i < tip.length; i++) {
+      const A = rot2(tip[i].a[0], tip[i].a[1], aOut + aIn), B = rot2(tip[i].b[0], tip[i].b[1], aOut + aIn);
+      s.push({ a: [rx + end[0] + A[0], ry + end[1] + A[1], tip[i].a[2]], b: [rx + end[0] + B[0], ry + end[1] + B[1], tip[i].b[2]], g: 3 });
+    }
+  }
+  return s;
+}
+function armFrame(t) {
+  const a1 = -0.3 + 0.1 * Math.sin(t * 0.45);
+  const a2 = 1.5 + 0.16 * Math.sin(t * 0.37 + 1.1);
+  const a3 = 0.55 + 0.14 * Math.sin(t * 0.7 + 0.4);
+  const A1 = a1, A2 = a1 + a2, A3 = a1 + a2 + a3;
+  const S0 = [0, 0.86];
+  const u = rot2(0, 1, A1), E0 = [S0[0] + u[0], S0[1] + u[1]];
+  const v = rot2(0, 0.88, A2), W0 = [E0[0] + v[0], E0[1] + v[1]];
+  return { A1: A1, A2: A2, A3: A3, S0: S0, E0: E0, W0: W0 };
+}
+
+// model 1 — meshing gear pair
+const GEAR_G = [{ cx: -0.52, cy: 0.2, dir: 1, spd: 0.5 }, { cx: 0.56, cy: -0.16, dir: -1, spd: 0.83 }];
+function buildGearWire() {
+  const s = [];
+  const one = (cx, cy, R0, teeth, tooth, thick, g) => {
+    const prof = (th) => { const f = ((th * teeth) / (Math.PI * 2)) % 1; return R0 + (f < 0.5 ? tooth : 0); };
+    ring("z", 0, teeth * 4, cx, cy, -thick / 2, g, s, prof);
+    ring("z", 0, teeth * 4, cx, cy, thick / 2, g, s, prof);
+    ring("z", 0.17, 18, cx, cy, -thick / 2, g, s);
+    ring("z", 0.17, 18, cx, cy, thick / 2, g, s);
+    for (let k = 0; k < 6; k++) {
+      const th = (k * Math.PI) / 3;
+      s.push({ a: [cx + Math.cos(th) * 0.17, cy + Math.sin(th) * 0.17, 0], b: [cx + Math.cos(th) * R0, cy + Math.sin(th) * R0, 0], g: g });
+    }
+  };
+  one(GEAR_G[0].cx, GEAR_G[0].cy, 0.7, 18, 0.13, 0.26, 0);
+  one(GEAR_G[1].cx, GEAR_G[1].cy, 0.42, 11, 0.12, 0.22, 1);
+  return s;
+}
+
+// model 2 — conveyor line. groups: 0 frame, 1..3 crates
+function buildConvWire() {
+  const s = [];
+  boxEdges(2.4, 0.12, 0.8, 0, 0, 0, 0, s);
+  boxEdges(2.4, 0.2, 0.06, 0, 0.07, 0.43, 0, s);
+  boxEdges(2.4, 0.2, 0.06, 0, 0.07, -0.43, 0, s);
+  for (let k = 0; k < 5; k++) cylEdges("z", 0.13, 0.78, -0.96 + k * 0.48, -0.12, 0, 0, s, 12);
+  boxEdges(0.1, 0.78, 0.1, -0.96, -0.64, 0, 0, s);
+  boxEdges(0.1, 0.78, 0.1, 0.96, -0.64, 0, 0, s);
+  for (let k = 0; k < 3; k++) boxEdges(0.34, 0.34, 0.34, -0.9 + k * 0.9, 0.29, 0, 1 + k, s);
+  return s;
+}
+function crateOffsets(t) {
+  const out = [];
+  for (let k = 0; k < 3; k++) {
+    const base = -0.9 + k * 0.9;
+    const nc = (((base + t * 0.34 + 1.35) % 2.7) + 2.7) % 2.7 - 1.35;
+    out.push(nc - base);
+  }
+  return out;
+}
+
+function makeModel(segs) {
+  const lens = segs.map((e) => Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1], e.b[2] - e.a[2]));
+  return { segs: segs, lens: lens, total: lens.reduce((a, b) => a + b, 0), ep: new Float64Array(segs.length * 6), samp: null };
+}
+function sampleOn(m, n, r) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let pick = r() * m.total, si = 0;
+    while (si < m.lens.length - 1 && pick > m.lens[si]) { pick -= m.lens[si]; si++; }
+    out.push({ si: si, u: r() });
+  }
+  return out;
+}
+function tp(mi, g, pt, fd, off, EP, o) {
+  let X = pt[0], Y = pt[1], Z = pt[2];
+  if (mi === 0) {
+    if (g === 1) { const v = rot2(X, Y, fd.A1); X = fd.S0[0] + v[0]; Y = fd.S0[1] + v[1]; }
+    else if (g === 2) { const v = rot2(X, Y, fd.A2); X = fd.E0[0] + v[0]; Y = fd.E0[1] + v[1]; }
+    else if (g === 3) { const v = rot2(X, Y, fd.A3); X = fd.W0[0] + v[0]; Y = fd.W0[1] + v[1]; }
+    X *= 0.92; Y = (Y - 0.8) * 0.92; Z *= 0.92;
+  } else if (mi === 1) {
+    const G = GEAR_G[g], a = G.dir * t_ref.t * G.spd;
+    const v = rot2(X - G.cx, Y - G.cy, a); X = G.cx + v[0]; Y = G.cy + v[1];
+  } else {
+    if (g > 0) X += off[g - 1];
+    Y -= 0.12;
+  }
+  EP[o] = X; EP[o + 1] = Y; EP[o + 2] = Z;
+}
+const t_ref = { t: 0 };
+function transformModel(mi, t) {
+  t_ref.t = t;
+  const M = MODELS[mi];
+  const fd = mi === 0 ? armFrame(t) : null;
+  const off = mi === 2 ? crateOffsets(t) : null;
+  const EP = M.ep;
+  for (let s = 0; s < M.segs.length; s++) {
+    const e = M.segs[s];
+    tp(mi, e.g, e.a, fd, off, EP, s * 6);
+    tp(mi, e.g, e.b, fd, off, EP, s * 6 + 3);
+  }
+  return M;
+}
+
+const MODEL_N = 900;
+const MODELS = [makeModel(buildArmWire()), makeModel(buildGearWire()), makeModel(buildConvWire())];
+const RS = rand(5150);
+MODELS.forEach((m) => { m.samp = sampleOn(m, MODEL_N, RS); });
+
+function buildAmbient(seed, n) {
+  const r = rand(seed);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const z = 0.25 + r() * 0.75;
+    out.push({
+      x: r(), y: r(), z: z,
+      vx: (r() - 0.5) * 0.014 * z, vy: (r() - 0.5) * 0.012 * z,
+      size: (1.6 + r() * 4.2) * z,
+      spin: r() * Math.PI * 2, spd: (r() - 0.5) * 0.9,
+      ph: r() * Math.PI * 2,
+      c: PARTICLE_COLORS[Math.floor(r() * PARTICLE_COLORS.length)]
+    });
+  }
+  return out;
+}
+
+function buildParticles(seed) {
+  const r = rand(seed);
+  const out = [];
+  for (let i = 0; i < MODEL_N; i++) {
+    out.push({
+      sx: (r() - 0.5) * 7, sy: (r() - 0.5) * 5.2, sz: (r() - 0.5) * 5.6,
+      size: 0.013 + r() * 0.019,
+      spin: r() * Math.PI * 2,
+      spd: (r() - 0.5) * 1.7,
+      ph: r() * Math.PI * 2,
+      c: PARTICLE_COLORS[Math.floor(r() * PARTICLE_COLORS.length)]
+    });
+  }
+  return out;
+}
+
+// scroll position (in viewport units) → which model, and the morph through scatter
+const MORPHS = [{ at: 1, from: 0, to: 1 }, { at: 8, from: 1, to: 2 }, { at: 10, from: 2, to: 0 }];
+const MORPH_W = 0.5;
+function stageAt(y) {
+  for (let i = 0; i < MORPHS.length; i++) {
+    const m = MORPHS[i];
+    if (y > m.at - MORPH_W && y < m.at + MORPH_W) {
+      return { from: m.from, to: m.to, p: (y - (m.at - MORPH_W)) / (2 * MORPH_W) };
+    }
+  }
+  const mi = y < 1 ? 0 : y < 8 ? 1 : y < 10 ? 2 : 0;
+  return { from: mi, to: mi, p: 0 };
+}
+
+const pad = (i) => String(i + 1).padStart(2, "0");
+
+class Component extends DCLogic {
+  state = { active: 0 };
+  trigs = [];
+  parts = buildParticles(9182736);
+  amb = buildAmbient(31415, 170);
+  hero = 1;
+  heroNow = 1;
+  setAxis = (el) => { this.axisEl = el; };
+  lastT = 0;
+  stage = { from: 0, to: 0, p: 0 };
+  fade = 1;
+
+  setArm = (el) => {
+    if (!el || el === this.canvas) return;
+    this.canvas = el;
+    this.ctx = el.getContext("2d");
+    this.startArm();
+  };
+
+  startArm() {
+    const fit = () => {
+      const cv = this.canvas;
+      if (!cv) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = cv.clientWidth || 600, h = cv.clientHeight || 600;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.box = { w: w, h: h };
+    };
+    fit();
+    this.ro = new ResizeObserver(fit);
+    this.ro.observe(this.canvas);
+    const t0 = performance.now();
+    const draw = (now) => {
+      this.raf = requestAnimationFrame(draw);
+      const ctx = this.ctx, box = this.box;
+      if (!ctx || !box) return;
+      const t = (now - t0) / 1000;
+      const st = this.stage;
+      this.fadeNow = this.fadeNow == null ? this.fade : this.fadeNow + (this.fade - this.fadeNow) * 0.08;
+      ctx.clearRect(0, 0, box.w, box.h);
+      const S = Math.min(box.w * 0.62, box.h) / 2.9;
+      const cx = box.w * (box.w > 900 ? 0.7 : 0.62), cy = box.h * 0.62;
+      const scatterAmt = 1 - Math.abs(2 * st.p - 1);
+      const half = st.p < 0.5;
+      const kRaw = half ? st.p * 2 : st.p * 2 - 1;
+      const kk = kRaw * kRaw * (3 - 2 * kRaw);
+      const mi = half ? st.from : st.to;
+      const M = transformModel(mi, t);
+      const EP = M.ep;
+      const bob = Math.sin(t * 0.5) * box.h * 0.014;
+      const baseRot = 0.55 * Math.sin(t * 0.19) + 0.12 * Math.sin(t * 0.63) + st.p * 1.1;
+      const cB = Math.cos(baseRot), sB = Math.sin(baseRot);
+      const fade = this.fadeNow;
+
+      this.heroNow += (this.hero - this.heroNow) * 0.1;
+      const hero = this.heroNow;
+      const px1 = [0, 0, 0], px2 = [0, 0, 0];
+      const proj = (X, Y, Z, o) => {
+        const XR = X * cB + Z * sB, ZR = -X * sB + Z * cB;
+        const persp = 4.6 / (4.6 + ZR);
+        o[0] = cx + XR * persp * S; o[1] = cy + bob - Y * persp * S; o[2] = persp;
+      };
+
+      if (hero > 0.015) {
+        const groundY = cy + bob + S * 0.66;
+        ctx.strokeStyle = "#8052ff";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.2 * hero;
+        ctx.beginPath();
+        ctx.ellipse(cx, groundY, S * 0.98, S * 0.3, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 0.14 * hero;
+        ctx.beginPath();
+        for (let k = 0; k < 28; k++) {
+          const a = (k / 28) * Math.PI * 2 + t * 0.18;
+          const c1 = Math.cos(a), s1 = Math.sin(a);
+          ctx.moveTo(cx + c1 * S * 1.02, groundY + s1 * S * 0.31);
+          ctx.lineTo(cx + c1 * S * 1.1, groundY + s1 * S * 0.335);
+        }
+        ctx.stroke();
+        for (let k = 0; k < 2; k++) {
+          ctx.globalAlpha = (0.13 - k * 0.04) * hero;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy + bob - S * 0.1, S * (1.02 + k * 0.22), S * (0.36 + k * 0.12), t * (k ? -0.09 : 0.14), 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        // slow scan sweep over the model
+        const sy = cy + bob + (((t * 0.16) % 1) - 0.5) * box.h * 1.1;
+        const grad = ctx.createLinearGradient(cx - S * 1.4, 0, cx + S * 1.4, 0);
+        grad.addColorStop(0, "rgba(128,82,255,0)");
+        grad.addColorStop(0.5, "rgba(128,82,255,1)");
+        grad.addColorStop(1, "rgba(128,82,255,0)");
+        ctx.globalAlpha = 0.16 * hero;
+        ctx.strokeStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(cx - S * 1.4, sy);
+        ctx.lineTo(cx + S * 1.4, sy);
+        ctx.stroke();
+        // pulse at the gripper
+        if (mi === 0) {
+          const fdA = armFrame(t);
+          const wx = fdA.W0[0] * 0.92, wy = (fdA.W0[1] - 0.8) * 0.92;
+          proj(wx, wy, 0, px1);
+          for (let k = 0; k < 2; k++) {
+            const ph = ((t * 0.5 + k * 0.5) % 1);
+            ctx.globalAlpha = (1 - ph) * 0.35 * hero;
+            ctx.strokeStyle = "#ffb829";
+            ctx.beginPath();
+            ctx.arc(px1[0], px1[1], 6 + ph * S * 0.3, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      if (this.axisEl && hero > 0.05 && (this.tick = (this.tick || 0) + 1) % 6 === 0) {
+        const fdB = armFrame(t);
+        const deg = (v) => (v * 57.2958).toFixed(1).padStart(5, " ");
+        this.axisEl.textContent = "AXIS 01 " + deg(fdB.A1) + "°   AXIS 02 " + deg(fdB.A2) + "°   AXIS 03 " + deg(fdB.A3) + "°";
+      }
+
+      const la = (1 - scatterAmt) * fade * 0.42;
+      if (la > 0.012) {
+        ctx.globalAlpha = la;
+        ctx.strokeStyle = "#8052ff";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let s = 0; s < M.segs.length; s++) {
+          const o6 = s * 6;
+          proj(EP[o6], EP[o6 + 1], EP[o6 + 2], px1);
+          proj(EP[o6 + 3], EP[o6 + 4], EP[o6 + 5], px2);
+          ctx.moveTo(px1[0], px1[1]);
+          ctx.lineTo(px2[0], px2[1]);
+        }
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < this.parts.length; i++) {
+        const p = this.parts[i];
+        const sp = M.samp[i], s6 = sp.si * 6, u = sp.u;
+        let X = EP[s6] + (EP[s6 + 3] - EP[s6]) * u;
+        let Y = EP[s6 + 1] + (EP[s6 + 4] - EP[s6 + 1]) * u;
+        let Z = EP[s6 + 2] + (EP[s6 + 5] - EP[s6 + 2]) * u;
+        if (half) { X += (p.sx - X) * kk; Y += (p.sy - Y) * kk; Z += (p.sz - Z) * kk; }
+        else { X = p.sx + (X - p.sx) * kk; Y = p.sy + (Y - p.sy) * kk; Z = p.sz + (Z - p.sz) * kk; }
+        const j = 0.008 * Math.sin(t * 1.6 + p.ph);
+        X += j; Y += j * 0.7;
+        const XR = X * cB + Z * sB, ZR = -X * sB + Z * cB;
+        const persp = 4.6 / (4.6 + ZR);
+        const pxx = cx + XR * persp * S, pyy = cy + bob - Y * persp * S;
+        const rad = Math.max(0.9, p.size * persp * S);
+        const ang = p.spin + t * p.spd * (0.25 + scatterAmt * 2.4);
+        const tw = 0.55 + 0.45 * Math.sin(t * 1.1 + p.ph) * 0.5;
+        ctx.globalAlpha = Math.max(0, Math.min(1, tw * (0.4 + 0.6 * persp) * fade));
+        ctx.strokeStyle = p.c;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let k = 0; k < 3; k++) {
+          const a = ang + (k * 2 * Math.PI) / 3;
+          const qx = pxx + rad * Math.cos(a), qy = pyy + rad * Math.sin(a);
+          if (k === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+      // drifting ambient field
+      const dt = Math.min(0.05, this.lastT ? (t - this.lastT) : 0.016);
+      this.lastT = t;
+      const ambFade = 0.55 + 0.45 * fade;
+      const par = (window.scrollY || 0) * 0.00006;
+      for (let i = 0; i < this.amb.length; i++) {
+        const a = this.amb[i];
+        a.x += a.vx * dt; a.y += a.vy * dt;
+        if (a.x < -0.05) a.x = 1.05; else if (a.x > 1.05) a.x = -0.05;
+        if (a.y < -0.05) a.y = 1.05; else if (a.y > 1.05) a.y = -0.05;
+        const ax = a.x * box.w;
+        const ay = (((a.y - par * a.z) % 1) + 1) % 1 * box.h;
+        const rr = a.size;
+        const an = a.spin + t * a.spd;
+        ctx.globalAlpha = Math.max(0, (0.12 + 0.5 * a.z) * (0.55 + 0.45 * Math.sin(t * 0.9 + a.ph)) * ambFade);
+        ctx.strokeStyle = a.c;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let q = 0; q < 3; q++) {
+          const aa = an + (q * 2 * Math.PI) / 3;
+          const qx = ax + rr * Math.cos(aa), qy = ay + rr * Math.sin(aa);
+          if (q === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    };
+    this.raf = requestAnimationFrame(draw);
+  }
+
+  onScroll = () => {
+    const y = window.scrollY / Math.max(1, window.innerHeight);
+    this.stage = stageAt(y);
+    this.fade = y < 0.9 ? 0.9 : y < 7.9 ? 0.3 : y < 9.9 ? 0.26 : 0.45;
+    this.hero = Math.max(0, Math.min(1, 1 - y / 0.85));
+  };
+
+  componentDidMount() {
+    this.applySnap();
+    window.addEventListener("scroll", this.onScroll, { passive: true });
+    this.onScroll();
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = this.trigs.indexOf(e.target);
+        if (i >= 0 && i !== this.state.active) this.setState({ active: i });
+      });
+    }, { rootMargin: "-50% 0px -50% 0px", threshold: 0 });
+    this.trigs.forEach((el) => el && this.io.observe(el));
+  }
+
+  componentDidUpdate() { this.applySnap(); }
+
+  componentWillUnmount() {
+    if (this.io) this.io.disconnect();
+    if (this.ro) this.ro.disconnect();
+    if (this.raf) cancelAnimationFrame(this.raf);
+    window.removeEventListener("scroll", this.onScroll);
+    document.documentElement.style.scrollSnapType = "";
+  }
+
+  applySnap() {
+    const on = this.props.snapScroll ?? true;
+    document.documentElement.style.scrollSnapType = on ? "y proximity" : "";
+  }
+
+  goTo(i) {
+    const el = this.trigs[i];
+    if (!el) return;
+    const de = document.documentElement;
+    de.style.scrollSnapType = "none";
+    clearTimeout(this.snapTimer);
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+    this.snapTimer = setTimeout(() => this.applySnap(), 900);
+  }
+
+  renderVals() {
+    const i = this.state.active;
+    const m = MEMBERS[i] || MEMBERS[0];
+    const left = i % 2 === 0;
+    const sfx = i % 4 < 2 ? "A" : "B";
+    const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const layers = (kind, k) => MEMBERS.map((x, n) => ({
+      id: kind + "-" + slug(x.name) + (k == null ? "" : "-" + (k + 1)),
+      ph: k == null ? "Photo — " + x.name : "Project photo " + (k + 1),
+      op: n === i ? 1 : 0,
+      pe: n === i ? "auto" : "none"
+    }));
+    return {
+      teamName: this.props.teamName ?? "Capstone Team",
+      ambientA: AMBIENT_A,
+      ambientB: AMBIENT_B,
+      armRef: this.setArm,
+      axisRef: this.setAxis,
+      portraits: layers("portrait", null),
+      shots: [0, 1, 2].map((k) => ({ layers: layers("shot", k) })),
+      member: { num: pad(i), name: m.name, role: m.role, line: m.line, chips: m.chips },
+      project: { code: "PRJ-" + pad(i), title: m.project.title, scope: m.project.scope, stack: m.project.stack, result: m.project.result },
+      members: MEMBERS.map((x, n) => ({ num: pad(n), name: x.name, role: x.role })),
+      roster: MEMBERS.map((x, n) => ({
+        name: x.name,
+        dot: n === i ? "#8052ff" : "#333333",
+        scale: n === i ? "1" : "0.7",
+        go: () => this.goTo(n)
+      })),
+      triggers: MEMBERS.map((x, n) => ({ ref: (el) => { this.trigs[n] = el; } })),
+      capabilities: CAPABILITIES.map((c, n) => ({ num: pad(n), title: c.title, body: c.body })),
+      stack: STACK,
+      memberOrder: left ? 1 : 2,
+      panelOrder: left ? 2 : 1,
+      enterAnim: (left ? "enL" : "enR") + sfx,
+      panelAnim: (left ? "enR" : "enL") + sfx,
+      lineAnim: (left ? "swRL" : "swLR") + sfx
+    };
+  }
+}
+</script>
+</body>
+</html>
