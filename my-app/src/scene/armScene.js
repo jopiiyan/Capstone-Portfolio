@@ -555,6 +555,13 @@ const SPANS = [
   { until: Infinity, mi: 0 },
 ];
 const MORPH_W = 0.3;
+
+// Which member's span the scroll position is in (same boundaries as SPANS), or -1 outside the team stage.
+export function memberAt(y) {
+  const n = Math.floor(y - 0.5);
+  return n >= 0 && n < MEMBER_MODELS.length ? n : -1;
+}
+
 export function stageAt(y) {
   for (let i = 0; i < SPANS.length - 1; i++) {
     const at = SPANS[i].until;

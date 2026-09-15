@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
-  armFrame, buildAmbient, buildParticles, stageAt, transformModel,
+  armFrame, buildAmbient, buildParticles, memberAt, stageAt, transformModel,
 } from "../scene/armScene.js";
 
 /**
@@ -12,6 +12,9 @@ export function useArmScene(canvasRef, axisRef) {
   const stageRef = useRef({ from: 0, to: 0, p: 0 });
   const fadeRef = useRef(1);
   const heroRef = useRef(1);
+  // Horizontal home of the model as a fraction of the width: right by default,
+  // and on the team stage it follows the profile (left for even members).
+  const sideRef = useRef(0.7);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -21,6 +24,7 @@ export function useArmScene(canvasRef, axisRef) {
     const parts = buildParticles(9182736);
     const amb = buildAmbient(31415, 170);
     let heroNow = 1;
+    let sideNow = null;
     let fadeNow = null;
     let lastT = 0;
     let tick = 0;
@@ -44,6 +48,8 @@ export function useArmScene(canvasRef, axisRef) {
       stageRef.current = stageAt(y);
       fadeRef.current = y < 0.9 ? 0.9 : y < 7.9 ? 0.3 : y < 9.9 ? 0.26 : 0.45;
       heroRef.current = Math.max(0, Math.min(1, 1 - y / 0.85));
+      const m = memberAt(y);
+      sideRef.current = m >= 0 && m % 2 === 0 ? 0.3 : 0.7;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -57,7 +63,9 @@ export function useArmScene(canvasRef, axisRef) {
       fadeNow = fadeNow == null ? fadeRef.current : fadeNow + (fadeRef.current - fadeNow) * 0.08;
       ctx.clearRect(0, 0, box.w, box.h);
       const S = Math.min(box.w * 0.62, box.h) / 2.9;
-      const cx = box.w * (box.w > 900 ? 0.7 : 0.62), cy = box.h * 0.62;
+      // Glide between sides rather than jumping; narrow screens keep one fixed spot.
+      sideNow = sideNow == null ? sideRef.current : sideNow + (sideRef.current - sideNow) * 0.06;
+      const cx = box.w * (box.w > 900 ? sideNow : 0.62), cy = box.h * 0.62;
       const scatterAmt = 1 - Math.abs(2 * st.p - 1);
       const half = st.p < 0.5;
       const kRaw = half ? st.p * 2 : st.p * 2 - 1;
