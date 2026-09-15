@@ -81,7 +81,7 @@ export function useArmScene(canvasRef, axisRef) {
 
       if (hero > 0.015) {
         const groundY = cy + bob + S * 0.66;
-        ctx.strokeStyle = "#8052ff";
+        ctx.strokeStyle = "#9DBBA2";
         ctx.lineWidth = 1;
         ctx.globalAlpha = 0.2 * hero;
         ctx.beginPath();
@@ -105,9 +105,9 @@ export function useArmScene(canvasRef, axisRef) {
         // slow scan sweep over the model
         const sy = cy + bob + (((t * 0.16) % 1) - 0.5) * box.h * 1.1;
         const grad = ctx.createLinearGradient(cx - S * 1.4, 0, cx + S * 1.4, 0);
-        grad.addColorStop(0, "rgba(128,82,255,0)");
-        grad.addColorStop(0.5, "rgba(128,82,255,1)");
-        grad.addColorStop(1, "rgba(128,82,255,0)");
+        grad.addColorStop(0, "rgba(157,187,162,0)");
+        grad.addColorStop(0.5, "rgba(157,187,162,1)");
+        grad.addColorStop(1, "rgba(157,187,162,0)");
         ctx.globalAlpha = 0.16 * hero;
         ctx.strokeStyle = grad;
         ctx.beginPath();
@@ -122,7 +122,7 @@ export function useArmScene(canvasRef, axisRef) {
           for (let k = 0; k < 2; k++) {
             const ph = ((t * 0.5 + k * 0.5) % 1);
             ctx.globalAlpha = (1 - ph) * 0.35 * hero;
-            ctx.strokeStyle = "#ffb829";
+            ctx.strokeStyle = "#F2B705";
             ctx.beginPath();
             ctx.arc(px1[0], px1[1], 6 + ph * S * 0.3, 0, Math.PI * 2);
             ctx.stroke();
@@ -132,14 +132,14 @@ export function useArmScene(canvasRef, axisRef) {
 
       if (axisRef.current && hero > 0.05 && (tick = tick + 1) % 6 === 0) {
         const fdB = armFrame(t);
-        const deg = (v) => (v * 57.2958).toFixed(1).padStart(5, " ");
-        axisRef.current.textContent = "AXIS 01 " + deg(fdB.A1) + "°   AXIS 02 " + deg(fdB.A2) + "°   AXIS 03 " + deg(fdB.A3) + "°";
+        const deg = (v) => { const d = v * 57.2958; return ((d < 0 ? "\u2212" : "+") + Math.abs(d).toFixed(1)).padStart(6, " "); };
+        axisRef.current.textContent = "J1 " + deg(fdB.A1) + "°    J2 " + deg(fdB.A2) + "°    J3 " + deg(fdB.A3) + "°";
       }
 
       const la = (1 - scatterAmt) * fade * 0.42;
       if (la > 0.012) {
         ctx.globalAlpha = la;
-        ctx.strokeStyle = "#8052ff";
+        ctx.strokeStyle = "#9DBBA2";
         ctx.lineWidth = 1;
         ctx.beginPath();
         for (let s = 0; s < M.segs.length; s++) {

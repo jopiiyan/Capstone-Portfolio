@@ -1,34 +1,32 @@
 import { motion } from "framer-motion";
 import { SlotStack } from "./MemberCard.jsx";
-import { MEMBERS, pad } from "../data.js";
+import { MEMBERS } from "../data.js";
 import { enterX } from "../motion/presets.js";
+import { BODY, C, caption, displayH } from "../theme.js";
 
-const metaLabel = {
-  fontSize: 12, letterSpacing: "0.35px", textTransform: "uppercase",
-  color: "#9a9a9a", fontWeight: 400,
-};
-const metaRow = {
-  display: "grid", gridTemplateColumns: "84px minmax(0, 1fr)", gap: 18,
-  fontSize: 15, fontWeight: 300, lineHeight: 1.55,
-};
+// Scope / Stack / Result set like the title block of a drawing sheet.
+const cell = { padding: "10px 14px", borderTop: `1px solid ${C.faint}` };
 
 export default function ProjectPanel({ active, left, order }) {
   const p = MEMBERS[active].project;
   // Mirrors the member column, so its direction is the opposite one.
   const e = enterX(!left, 0.09);
 
+  const rows = [
+    ["Scope", p.scope, C.paper],
+    ["Stack", p.stack, C.paper],
+    ["Result", p.result, C.dim],
+  ];
+
   return (
     <div style={{ order }}>
       {/* @keyframes enRA/enRB/enLA/enLB, 90ms behind the member column */}
       <motion.div key={active} initial={e.initial} animate={e.animate} transition={e.transition}>
-        <div style={{
-          fontSize: 14, fontWeight: 600, letterSpacing: "0.35px", textTransform: "uppercase",
-          color: "#ffb829", marginBottom: 14,
-        }}>Project · PRJ-{pad(active)} · placeholder</div>
+        <div style={{ ...caption, marginBottom: 10 }}>Project</div>
 
         <h3 style={{
-          fontSize: "clamp(24px, min(3.2vw, 5vh), 42px)", lineHeight: 1.2,
-          letterSpacing: "-0.022em", fontWeight: 400, margin: "0 0 18px",
+          ...displayH, fontSize: "clamp(32px, min(4.2vw, 6.4vh), 58px)", lineHeight: 0.95,
+          margin: "0 0 20px",
         }}>{p.title}</h3>
 
         <div style={{
@@ -46,10 +44,17 @@ export default function ProjectPanel({ active, left, order }) {
           ))}
         </div>
 
-        <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-          <div style={metaRow}><span style={metaLabel}>Scope</span><span style={{ color: "#ffffff" }}>{p.scope}</span></div>
-          <div style={metaRow}><span style={metaLabel}>Stack</span><span style={{ color: "#ffffff" }}>{p.stack}</span></div>
-          <div style={metaRow}><span style={metaLabel}>Result</span><span style={{ color: "#bdbdbd" }}>{p.result}</span></div>
+        <div style={{
+          display: "grid", gridTemplateColumns: "84px minmax(0, 1fr)", maxWidth: 540,
+          borderBottom: `1px solid ${C.faint}`, borderLeft: `1px solid ${C.faint}`,
+          borderRight: `1px solid ${C.faint}`,
+        }}>
+          {rows.map(([label, value, color]) => [
+            <span key={`${label}-l`} style={{ ...cell, ...caption, borderRight: `1px solid ${C.faint}` }}>{label}</span>,
+            <span key={`${label}-v`} style={{
+              ...cell, fontFamily: BODY, fontSize: 17, fontWeight: 400, lineHeight: 1.45, color,
+            }}>{value}</span>,
+          ])}
         </div>
       </motion.div>
     </div>

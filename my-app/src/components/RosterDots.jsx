@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { MEMBERS } from "../data.js";
 import { EASE_CSS, HOVER_INSTANT } from "../motion/presets.js";
+import { C } from "../theme.js";
 
 export default function RosterDots({ active, goTo }) {
   return (
@@ -20,7 +21,7 @@ export default function RosterDots({ active, goTo }) {
           <motion.span
             style={{ width: 10, height: 10, borderRadius: 9999 }}
             animate={{
-              backgroundColor: n === active ? "#8052ff" : "#333333",
+              backgroundColor: n === active ? C.signal : C.faint,
               scale: n === active ? 1 : 0.7,
             }}
             transition={{ duration: 0.3, ease: EASE_CSS }}

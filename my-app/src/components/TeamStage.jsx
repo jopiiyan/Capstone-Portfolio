@@ -20,7 +20,7 @@ export default function TeamStage({ active, railRef, goTo }) {
       }}>
         <StageLines active={active} left={left} />
 
-        <div style={{
+        <div className="stage-grid" style={{
           position: "relative", display: "grid",
           gridTemplateColumns: "minmax(0, 0.95fr) minmax(0, 1.05fr) 40px",
           gap: "clamp(28px, 4vw, 60px)", alignItems: "center",

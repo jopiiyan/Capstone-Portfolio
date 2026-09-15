@@ -32,8 +32,6 @@ export const STACK = [
   { group: "Delivery", items: ["Requirements docs", "Figma", "Jira", "Test & handover packs"] }
 ];
 
-export const PARTICLE_COLORS = ["#8052ff", "#ffb829", "#15846e", "#b39dff", "#4a6cf7", "#d75ec9", "#5ad1c8"];
-
-export const pad = (i) => String(i + 1).padStart(2, "0");
+export const PARTICLE_COLORS = ["#9DBBA2", "#9DBBA2", "#C4D6C3", "#5F7F66", "#A3A69C", "#EFEADF", "#F2B705"];
 
 export const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");

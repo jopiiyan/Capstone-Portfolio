@@ -1,10 +1,28 @@
 /* Everything from the design's <style> block except the @keyframes — all
    fourteen of those now live in framer-motion (see src/motion/presets.js). */
 *, *::before, *::after { box-sizing: border-box; }
-h1, h2, h3 { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+h1, h2, h3 { font-family: 'Big Shoulders Display', 'Arial Narrow', ui-sans-serif, sans-serif; }
 html { scroll-behavior: smooth; background: #000000; }
-body { margin: 0; background: #000000; }
-a { color: #ffb829; text-decoration: none; }
-a:hover { color: #ffffff; }
-::selection { background: rgba(128, 82, 255, 0.45); }
-:focus-visible { outline: 2px solid #8052ff; outline-offset: 3px; }
+body {
+  margin: 0; background: #000000; color: #EFEADF;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+a { color: #F2B705; text-decoration: none; }
+a:hover { color: #EFEADF; }
+::selection { background: rgba(157, 187, 162, 0.4); }
+:focus-visible { outline: 2px solid #F2B705; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* Layout is inline-styled; these hooks collapse the two-column grids on narrow
+   screens (!important is needed to beat inline declarations). */
+@media (max-width: 760px) {
+  .split, .spec-row { grid-template-columns: minmax(0, 1fr) !important; gap: 20px !important; }
+  .spec-row { gap: 4px !important; }
+  .rail-row { grid-template-columns: minmax(0, 1fr) !important; }
+  .nav { gap: 16px !important; padding: 16px 20px !important; }
+  .nav-link, .title-block { display: none !important; }
+  .stage-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
