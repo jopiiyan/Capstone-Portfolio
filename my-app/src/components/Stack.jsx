@@ -1,8 +1,9 @@
+import TermBlock from "./TermBlock.jsx";
 import { STACK } from "../data.js";
-import { BODY, C, DISPLAY, body, displayH } from "../theme.js";
+import { C, DISPLAY, body, displayH } from "../theme.js";
 
 // Laid out like the inside of a control cabinet: one DIN rail per discipline,
-// each tool a labelled terminal block clipped onto it.
+// each tool a labelled terminal block (TermBlock) clipped onto it.
 const RAIL_H = 14;
 
 function Rail() {
@@ -13,26 +14,6 @@ function Rail() {
       borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`, opacity: 0.45,
       background: `repeating-linear-gradient(90deg, transparent 0 22px, ${C.faint} 22px 34px)`,
     }} />
-  );
-}
-
-function Block({ children }) {
-  return (
-    <span style={{
-      position: "relative", display: "inline-flex", alignItems: "center", gap: 10,
-      padding: "10px 14px 10px 10px", background: C.ink,
-      border: `1px solid ${C.faint}`, borderTop: `2px solid ${C.line}`,
-      fontFamily: BODY, fontSize: 18, fontWeight: 500, lineHeight: 1.2, color: C.paper,
-      whiteSpace: "nowrap",
-    }}>
-      {/* Screw terminal */}
-      <span aria-hidden="true" style={{
-        width: 11, height: 11, borderRadius: "50%", flex: "none",
-        border: `1px solid ${C.dim}`,
-        background: `linear-gradient(135deg, transparent 45%, ${C.dim} 45% 55%, transparent 55%)`,
-      }} />
-      {children}
-    </span>
   );
 }
 
@@ -67,7 +48,7 @@ export default function Stack() {
             <div style={{ position: "relative", padding: "0 18px" }}>
               <Rail />
               <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {s.items.map((i) => <Block key={i}>{i}</Block>)}
+                {s.items.map((i) => <TermBlock key={i}>{i}</TermBlock>)}
               </div>
             </div>
           </div>

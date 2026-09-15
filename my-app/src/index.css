@@ -25,4 +25,11 @@ a:hover { color: #EFEADF; }
   .nav { gap: 16px !important; padding: 16px 20px !important; }
   .nav-link, .title-block { display: none !important; }
   .stage-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  /* Single column: undo the right-hand mirroring so members don't zig-zag. */
+  .member-right, .member-right * { text-align: left !important; }
+  .member-right [data-mirror] {
+    justify-self: start !important; margin-left: 0 !important;
+    justify-content: flex-start !important; flex-direction: row !important;
+  }
+  .member-right [data-mirror-col] { align-items: flex-start !important; }
 }
