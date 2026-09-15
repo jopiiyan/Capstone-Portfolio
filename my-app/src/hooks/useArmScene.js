@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
-  armFrame, buildAmbient, buildParticles, stageAt, transformModel,
+  armFrame, buildAmbient, buildParticles, memberAt, stageAt, transformModel,
 } from "../scene/armScene.js";
 
 /**
@@ -12,6 +12,9 @@ export function useArmScene(canvasRef, axisRef) {
   const stageRef = useRef({ from: 0, to: 0, p: 0 });
   const fadeRef = useRef(1);
   const heroRef = useRef(1);
+  // Horizontal home of the model as a fraction of the width: right by default,
+  // and on the team stage it follows the profile (left for even members).
+  const sideRef = useRef(0.7);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -21,6 +24,7 @@ export function useArmScene(canvasRef, axisRef) {
     const parts = buildParticles(9182736);
     const amb = buildAmbient(31415, 170);
     let heroNow = 1;
+    let sideNow = null;
     let fadeNow = null;
     let lastT = 0;
     let tick = 0;
@@ -44,6 +48,8 @@ export function useArmScene(canvasRef, axisRef) {
       stageRef.current = stageAt(y);
       fadeRef.current = y < 0.9 ? 0.9 : y < 7.9 ? 0.3 : y < 9.9 ? 0.26 : 0.45;
       heroRef.current = Math.max(0, Math.min(1, 1 - y / 0.85));
+      const m = memberAt(y);
+      sideRef.current = m >= 0 && m % 2 === 0 ? 0.3 : 0.7;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -57,7 +63,9 @@ export function useArmScene(canvasRef, axisRef) {
       fadeNow = fadeNow == null ? fadeRef.current : fadeNow + (fadeRef.current - fadeNow) * 0.08;
       ctx.clearRect(0, 0, box.w, box.h);
       const S = Math.min(box.w * 0.62, box.h) / 2.9;
-      const cx = box.w * (box.w > 900 ? 0.7 : 0.62), cy = box.h * 0.62;
+      // Glide between sides rather than jumping; narrow screens keep one fixed spot.
+      sideNow = sideNow == null ? sideRef.current : sideNow + (sideRef.current - sideNow) * 0.06;
+      const cx = box.w * (box.w > 900 ? sideNow : 0.62), cy = box.h * 0.62;
       const scatterAmt = 1 - Math.abs(2 * st.p - 1);
       const half = st.p < 0.5;
       const kRaw = half ? st.p * 2 : st.p * 2 - 1;
@@ -81,7 +89,7 @@ export function useArmScene(canvasRef, axisRef) {
 
       if (hero > 0.015) {
         const groundY = cy + bob + S * 0.66;
-        ctx.strokeStyle = "#8052ff";
+        ctx.strokeStyle = "#9DBBA2";
         ctx.lineWidth = 1;
         ctx.globalAlpha = 0.2 * hero;
         ctx.beginPath();
@@ -105,9 +113,9 @@ export function useArmScene(canvasRef, axisRef) {
         // slow scan sweep over the model
         const sy = cy + bob + (((t * 0.16) % 1) - 0.5) * box.h * 1.1;
         const grad = ctx.createLinearGradient(cx - S * 1.4, 0, cx + S * 1.4, 0);
-        grad.addColorStop(0, "rgba(128,82,255,0)");
-        grad.addColorStop(0.5, "rgba(128,82,255,1)");
-        grad.addColorStop(1, "rgba(128,82,255,0)");
+        grad.addColorStop(0, "rgba(157,187,162,0)");
+        grad.addColorStop(0.5, "rgba(157,187,162,1)");
+        grad.addColorStop(1, "rgba(157,187,162,0)");
         ctx.globalAlpha = 0.16 * hero;
         ctx.strokeStyle = grad;
         ctx.beginPath();
@@ -122,7 +130,7 @@ export function useArmScene(canvasRef, axisRef) {
           for (let k = 0; k < 2; k++) {
             const ph = ((t * 0.5 + k * 0.5) % 1);
             ctx.globalAlpha = (1 - ph) * 0.35 * hero;
-            ctx.strokeStyle = "#ffb829";
+            ctx.strokeStyle = "#F2B705";
             ctx.beginPath();
             ctx.arc(px1[0], px1[1], 6 + ph * S * 0.3, 0, Math.PI * 2);
             ctx.stroke();
@@ -132,14 +140,14 @@ export function useArmScene(canvasRef, axisRef) {
 
       if (axisRef.current && hero > 0.05 && (tick = tick + 1) % 6 === 0) {
         const fdB = armFrame(t);
-        const deg = (v) => (v * 57.2958).toFixed(1).padStart(5, " ");
-        axisRef.current.textContent = "AXIS 01 " + deg(fdB.A1) + "°   AXIS 02 " + deg(fdB.A2) + "°   AXIS 03 " + deg(fdB.A3) + "°";
+        const deg = (v) => { const d = v * 57.2958; return ((d < 0 ? "\u2212" : "+") + Math.abs(d).toFixed(1)).padStart(6, " "); };
+        axisRef.current.textContent = "J1 " + deg(fdB.A1) + "°    J2 " + deg(fdB.A2) + "°    J3 " + deg(fdB.A3) + "°";
       }
 
       const la = (1 - scatterAmt) * fade * 0.42;
       if (la > 0.012) {
         ctx.globalAlpha = la;
-        ctx.strokeStyle = "#8052ff";
+        ctx.strokeStyle = "#9DBBA2";
         ctx.lineWidth = 1;
         ctx.beginPath();
         for (let s = 0; s < M.segs.length; s++) {

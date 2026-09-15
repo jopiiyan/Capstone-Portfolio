@@ -10,6 +10,7 @@ import TeamStage from "./components/TeamStage.jsx";
 import { MEMBERS } from "./data.js";
 import { useActiveMember } from "./hooks/useActiveMember.js";
 import { useScrollSnap } from "./hooks/useScrollSnap.js";
+import { BODY, C } from "./theme.js";
 
 export default function App({ teamName = "Capstone Team", snapScroll = true }) {
   // Shared between Hero (which owns the node) and the canvas loop (which writes
@@ -21,15 +22,14 @@ export default function App({ teamName = "Capstone Team", snapScroll = true }) {
 
   return (
     <div style={{
-      position: "relative", background: "#000000", color: "#ffffff",
-      fontFamily: "'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif",
+      position: "relative", background: C.ink, color: C.paper, fontFamily: BODY,
       minHeight: "100vh",
     }}>
       <ArmCanvas axisRef={axisRef} />
       <AmbientField />
       <Nav teamName={teamName} />
 
-      <Hero axisRef={axisRef} />
+      <Hero axisRef={axisRef} teamName={teamName} />
       <TeamStage active={active} railRef={railRef} goTo={goTo} />
       <Capabilities />
       <Stack />

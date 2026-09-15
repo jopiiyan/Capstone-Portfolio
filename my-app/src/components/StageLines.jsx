@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { sweep } from "../motion/presets.js";
+import { C } from "../theme.js";
 
 // @keyframes swRLA/swRLB/swLRA/swLRB. The A/B suffixes in the source only
 // existed to restart the CSS animation on member change — `key` does that here.
 const LINES = [
-  { top: "22%", color: "#8052ff", delay: 0 },
-  { top: "50%", color: "#ffb829", delay: 0.11 },
-  { top: "78%", color: "#8052ff", delay: 0.22 },
+  { top: "22%", color: C.line, delay: 0 },
+  { top: "50%", color: C.line, delay: 0.11 },
+  { top: "78%", color: C.signal, delay: 0.22 },
 ];
 
 export default function StageLines({ active, left }) {

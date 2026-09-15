@@ -1,46 +1,55 @@
+import TermBlock from "./TermBlock.jsx";
 import { STACK } from "../data.js";
+import { C, DISPLAY, body, displayH } from "../theme.js";
+
+// Laid out like the inside of a control cabinet: one DIN rail per discipline,
+// each tool a labelled terminal block (TermBlock) clipped onto it.
+const RAIL_H = 14;
+
+function Rail() {
+  return (
+    <span aria-hidden="true" style={{
+      position: "absolute", left: 0, right: 0, top: "50%", height: RAIL_H,
+      transform: "translateY(-50%)",
+      borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`, opacity: 0.45,
+      background: `repeating-linear-gradient(90deg, transparent 0 22px, ${C.faint} 22px 34px)`,
+    }} />
+  );
+}
 
 export default function Stack() {
   return (
     <section id="stack" data-screen-label="Stack" style={{
       position: "relative", zIndex: 1, minHeight: "100vh", scrollSnapAlign: "start",
-      display: "grid", alignContent: "center", gap: 60, padding: "120px 36px 60px",
-      maxWidth: 1280, margin: "0 auto",
+      display: "grid", alignContent: "center", gap: "clamp(28px, 5vh, 52px)",
+      padding: "120px 36px 60px", maxWidth: 1280, margin: "0 auto",
     }}>
-      <div style={{
+      <div className="split" style={{
         display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
         gap: 60, alignItems: "end",
       }}>
-        <div>
-          <div style={{
-            fontSize: 14, fontWeight: 600, letterSpacing: "0.35px", textTransform: "uppercase",
-            color: "#ffb829", marginBottom: 24,
-          }}>What we work in</div>
-          <h2 style={{
-            fontSize: "clamp(40px, 5.2vw, 78px)", lineHeight: 1.05,
-            letterSpacing: "-0.022em", fontWeight: 400, margin: 0,
-          }}>Tools &amp; stack</h2>
-        </div>
-        <p style={{
-          fontSize: 18, fontWeight: 300, lineHeight: 1.55, color: "#bdbdbd",
-          maxWidth: 520, margin: 0,
-        }}>Placeholder list. Trim it to what the team can defend in a room.</p>
+        <h2 style={{ ...displayH, fontSize: "clamp(56px, 7.6vw, 120px)" }}>Tools &amp; stack</h2>
+        <p style={{ ...body, fontSize: "clamp(20px, 2.6vh, 23px)", maxWidth: "26em", margin: 0 }}>
+          Sorted the way they get wired into a build: one rail per discipline.
+        </p>
       </div>
 
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 36,
-      }}>
+      <div style={{ display: "grid", gap: "clamp(14px, 2.6vh, 26px)" }}>
         {STACK.map((s) => (
-          <div key={s.group} style={{ display: "grid", gap: 18, alignContent: "start" }}>
+          <div key={s.group} className="rail-row" style={{
+            display: "grid", gridTemplateColumns: "180px minmax(0, 1fr)",
+            gap: "10px 28px", alignItems: "center",
+          }}>
             <div style={{
-              fontSize: 12, letterSpacing: "0.35px", textTransform: "uppercase", color: "#8052ff",
+              fontFamily: DISPLAY, fontSize: "clamp(26px, 3.4vh, 34px)", fontWeight: 800,
+              lineHeight: 1, color: C.paper,
             }}>{s.group}</div>
-            <div style={{ display: "grid", gap: 6 }}>
-              {s.items.map((i) => (
-                <div key={i} style={{
-                  fontSize: 18, fontWeight: 300, lineHeight: 1.55, color: "#ffffff",
-                }}>{i}</div>
-              ))}
+
+            <div style={{ position: "relative", padding: "0 18px" }}>
+              <Rail />
+              <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {s.items.map((i) => <TermBlock key={i}>{i}</TermBlock>)}
+              </div>
             </div>
           </div>
         ))}

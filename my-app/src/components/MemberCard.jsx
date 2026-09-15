@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import ImageSlot from "./ImageSlot.jsx";
+import TermBlock from "./TermBlock.jsx";
 import { MEMBERS } from "../data.js";
 import { crossFade, enterX } from "../motion/presets.js";
+import { C, DISPLAY, body, caption, displayH } from "../theme.js";
 
 // transition: opacity 400ms ease — all seven portraits stay mounted and stacked
 // so switching members cross-fades instead of re-decoding an image.
@@ -12,54 +14,88 @@ export function SlotStack({ active, layers }) {
       animate={{ opacity: n === active ? 1 : 0 }}
       transition={crossFade}
     >
-      <ImageSlot src={l.src} placeholder={l.ph} radius={24} />
+      <ImageSlot src={l.src} placeholder={l.ph} />
     </motion.div>
   ));
+}
+
+// Drawing callout balloon: the member's position on the scroll rail.
+function Balloon({ n }) {
+  return (
+    <span style={{
+      display: "inline-grid", placeItems: "center", width: 30, height: 30, flex: "none",
+      border: `1px solid ${C.line}`, borderRadius: "50%", color: C.line,
+      fontFamily: DISPLAY, fontSize: 17, fontWeight: 800, fontVariantNumeric: "tabular-nums",
+    }}>{n}</span>
+  );
 }
 
 export default function MemberCard({ active, left, order }) {
   const m = MEMBERS[active];
   const e = enterX(left);
+  // On the right-hand side the card mirrors so it hugs the outer edge.
+  const right = !left;
 
   const portraits = MEMBERS.map((x) => ({
-    key: `portrait-${x.name}`, ph: `Photo — ${x.name}`, src: x.photo,
+    key: `portrait-${x.name}`, ph: `Photo of ${x.name}`, src: x.photo,
   }));
 
   return (
-    <div style={{ order }}>
+    <div className={right ? "member-right" : undefined} style={{ order }}>
       {/* @keyframes enLA/enLB/enRA/enRB */}
       <motion.div key={active}
         style={{ display: "grid", gap: "clamp(14px, 2.4vh, 24px)" }}
         initial={e.initial} animate={e.animate} transition={e.transition}
       >
-        <div style={{
-          position: "relative", height: "clamp(150px, 32vh, 380px)",
-          aspectRatio: "4 / 5", maxWidth: "100%",
+        {/* Portrait with the member's tech stack clipped on beside it */}
+        <div data-mirror style={{
+          display: "flex", alignItems: "flex-start", gap: 16,
+          flexDirection: right ? "row-reverse" : "row",
         }}>
-          <SlotStack active={active} layers={portraits} />
+          <div style={{
+            position: "relative", height: "clamp(150px, 32vh, 380px)",
+            aspectRatio: "4 / 5", maxWidth: "60%", flex: "none",
+          }}>
+            <SlotStack active={active} layers={portraits} />
+          </div>
+
+          <div data-mirror-col aria-label="Tech stack" style={{
+            display: "flex", flexDirection: "column", gap: 6, minWidth: 0,
+            alignItems: right ? "flex-end" : "flex-start",
+          }}>
+            {m.stack.map((s) => <TermBlock key={s} compact>{s}</TermBlock>)}
+          </div>
         </div>
 
-        <div>
-          <div style={{
-            fontSize: 12, lineHeight: 1.5, letterSpacing: "0.35px", textTransform: "uppercase",
-            color: "#8052ff", marginBottom: 12,
-          }}>{String(active + 1).padStart(2, "0")} · {m.role}</div>
+        <div style={{ textAlign: right ? "right" : "left" }}>
+          <div data-mirror style={{
+            display: "flex", alignItems: "center", gap: 12, marginBottom: 12,
+            flexDirection: right ? "row-reverse" : "row",
+          }}>
+            <Balloon n={active + 1} />
+            <span style={{ ...caption, fontSize: 17, color: C.line }}>{m.role}</span>
+          </div>
 
           <h2 style={{
-            fontSize: "clamp(32px, min(5.4vw, 8.4vh), 78px)", lineHeight: 1.05,
-            letterSpacing: "-0.022em", fontWeight: 400, margin: "0 0 14px",
+            ...displayH, fontSize: "clamp(44px, min(7vw, 11vh), 110px)",
+            margin: "0 0 14px",
           }}>{m.name}</h2>
 
-          <p style={{
-            fontSize: "clamp(15px, 1.9vh, 18px)", fontWeight: 300, lineHeight: 1.55,
-            color: "#bdbdbd", maxWidth: 460, margin: "0 0 14px",
+          <p data-mirror style={{
+            ...body, fontSize: "clamp(18px, 2.4vh, 22px)", color: C.paper,
+            maxWidth: "26em", margin: "0 0 16px", marginLeft: right ? "auto" : 0,
           }}>{m.line}</p>
 
-          <div style={{
-            display: "flex", flexWrap: "wrap", gap: 18, fontSize: 12, letterSpacing: "0.35px",
-            textTransform: "uppercase", color: "#9a9a9a",
+          <div data-mirror style={{
+            display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 14px",
+            justifyContent: right ? "flex-end" : "flex-start",
           }}>
-            {m.chips.map((chip) => <span key={chip}>{chip}</span>)}
+            {m.chips.map((chip, i) => (
+              <span key={chip} style={{ ...caption, display: "inline-flex", alignItems: "center", gap: 14 }}>
+                {i > 0 && <span style={{ width: 1, height: 10, background: C.line, opacity: 0.6 }} />}
+                {chip}
+              </span>
+            ))}
           </div>
         </div>
       </motion.div>

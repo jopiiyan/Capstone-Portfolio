@@ -1,56 +1,29 @@
 import { motion } from "framer-motion";
-import { SlotStack } from "./MemberCard.jsx";
-import { MEMBERS, pad } from "../data.js";
+import ProjectCard from "./ProjectCard.jsx";
+import ProjectCarousel from "./ProjectCarousel.jsx";
+import { MEMBERS } from "../data.js";
 import { enterX } from "../motion/presets.js";
-
-const metaLabel = {
-  fontSize: 12, letterSpacing: "0.35px", textTransform: "uppercase",
-  color: "#9a9a9a", fontWeight: 400,
-};
-const metaRow = {
-  display: "grid", gridTemplateColumns: "84px minmax(0, 1fr)", gap: 18,
-  fontSize: 15, fontWeight: 300, lineHeight: 1.55,
-};
+import { displayH } from "../theme.js";
 
 export default function ProjectPanel({ active, left, order }) {
-  const p = MEMBERS[active].project;
+  const { projects } = MEMBERS[active];
   // Mirrors the member column, so its direction is the opposite one.
   const e = enterX(!left, 0.09);
 
   return (
-    <div style={{ order }}>
+    // Starts above the profile row so the showcase gets the extra height.
+    <div style={{ order, alignSelf: "start", marginTop: "calc(-1 * clamp(0px, 6vh, 60px))" }}>
       {/* @keyframes enRA/enRB/enLA/enLB, 90ms behind the member column */}
       <motion.div key={active} initial={e.initial} animate={e.animate} transition={e.transition}>
-        <div style={{
-          fontSize: 14, fontWeight: 600, letterSpacing: "0.35px", textTransform: "uppercase",
-          color: "#ffb829", marginBottom: 14,
-        }}>Project · PRJ-{pad(active)} · placeholder</div>
+        <h2 style={{
+          ...displayH, fontSize: "clamp(40px, min(5vw, 7vh), 76px)", lineHeight: 0.85,
+          textAlign: "center", margin: "0 0 clamp(20px, 4vh, 40px)",
+        }}>{projects.length > 1 ? "Projects" : "Project"}</h2>
 
-        <h3 style={{
-          fontSize: "clamp(24px, min(3.2vw, 5vh), 42px)", lineHeight: 1.2,
-          letterSpacing: "-0.022em", fontWeight: 400, margin: "0 0 18px",
-        }}>{p.title}</h3>
-
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 12, marginBottom: 24,
-        }}>
-          {[0, 1, 2].map((k) => (
-            <div key={k} style={{ position: "relative", aspectRatio: "4 / 3" }}>
-              <SlotStack active={active} layers={MEMBERS.map((x) => ({
-                key: `shot-${x.name}-${k + 1}`,
-                ph: `Project photo ${k + 1}`,
-                src: x.project.shots?.[k],
-              }))} />
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-          <div style={metaRow}><span style={metaLabel}>Scope</span><span style={{ color: "#ffffff" }}>{p.scope}</span></div>
-          <div style={metaRow}><span style={metaLabel}>Stack</span><span style={{ color: "#ffffff" }}>{p.stack}</span></div>
-          <div style={metaRow}><span style={metaLabel}>Result</span><span style={{ color: "#bdbdbd" }}>{p.result}</span></div>
-        </div>
+        {/* key resets to the first card when the member changes */}
+        <ProjectCarousel key={active}>
+          {projects.map((p) => <ProjectCard key={p.title} {...p} />)}
+        </ProjectCarousel>
       </motion.div>
     </div>
   );

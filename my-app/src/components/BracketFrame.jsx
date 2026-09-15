@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { EASE_OUT } from "../motion/presets.js";
+import { C, caption } from "../theme.js";
 
 // Each corner ran TWO CSS animations on one element: `brk` (700ms entry, fill
 // `both`) then `brkPulse` (4.5s infinite), both writing `opacity`. brk always
@@ -7,14 +8,15 @@ import { EASE_OUT } from "../motion/presets.js";
 // outer runs the entry, inner loops the pulse — multiplies to exactly the same
 // values CSS produced by override. Borders live on the inner element so the
 // pulse actually fades them; transform-origin stays on the outer, scaled one.
+const B = `1px solid ${C.line}`;
 const CORNERS = [
-  { pos: { top: 0, left: 0 },     origin: "top left",     border: { borderLeft: "1px solid #8052ff", borderTop: "1px solid #8052ff" },    brk: 0,    pulse: 0.7 },
-  { pos: { top: 0, right: 0 },    origin: "top right",    border: { borderRight: "1px solid #8052ff", borderTop: "1px solid #8052ff" },   brk: 0.12, pulse: 1.0 },
-  { pos: { bottom: 0, left: 0 },  origin: "bottom left",  border: { borderLeft: "1px solid #8052ff", borderBottom: "1px solid #8052ff" }, brk: 0.24, pulse: 1.4 },
-  { pos: { bottom: 0, right: 0 }, origin: "bottom right", border: { borderRight: "1px solid #8052ff", borderBottom: "1px solid #8052ff" },brk: 0.36, pulse: 1.8 },
+  { pos: { top: 0, left: 0 },     origin: "top left",     border: { borderLeft: B, borderTop: B },     brk: 0,    pulse: 0.7 },
+  { pos: { top: 0, right: 0 },    origin: "top right",    border: { borderRight: B, borderTop: B },    brk: 0.12, pulse: 1.0 },
+  { pos: { bottom: 0, left: 0 },  origin: "bottom left",  border: { borderLeft: B, borderBottom: B },  brk: 0.24, pulse: 1.4 },
+  { pos: { bottom: 0, right: 0 }, origin: "bottom right", border: { borderRight: B, borderBottom: B }, brk: 0.36, pulse: 1.8 },
 ];
 
-export default function BracketFrame() {
+export default function BracketFrame({ teamName }) {
   return (
     <div style={{ position: "absolute", inset: "104px 30px 30px", pointerEvents: "none" }}>
       {CORNERS.map((c, i) => (
@@ -31,6 +33,16 @@ export default function BracketFrame() {
           />
         </motion.span>
       ))}
+
+      {/* Title block, tucked inside the top-right bracket like a drawing sheet. */}
+      <div className="title-block" style={{
+        position: "absolute", top: 14, right: 40, display: "grid",
+        gridTemplateColumns: "auto auto", border: `1px solid ${C.faint}`,
+        ...caption, fontSize: 13,
+      }}>
+        <span style={{ padding: "6px 10px", borderRight: `1px solid ${C.faint}`, color: C.paper }}>{teamName}</span>
+        <span style={{ padding: "6px 10px" }}>Sheet 1 of 5</span>
+      </div>
     </div>
   );
 }

@@ -20,9 +20,12 @@ export default function TeamStage({ active, railRef, goTo }) {
       }}>
         <StageLines active={active} left={left} />
 
-        <div style={{
+        <div className="stage-grid" style={{
           position: "relative", display: "grid",
-          gridTemplateColumns: "minmax(0, 0.95fr) minmax(0, 1.05fr) 40px",
+          // Widths follow the columns as they swap, so the member side is always 0.95fr.
+          gridTemplateColumns: left
+            ? "minmax(0, 0.95fr) minmax(0, 1.05fr) 40px"
+            : "minmax(0, 1.05fr) minmax(0, 0.95fr) 40px",
           gap: "clamp(28px, 4vw, 60px)", alignItems: "center",
           maxWidth: 1280, width: "100%", margin: "0 auto",
         }}>
