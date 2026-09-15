@@ -1,18 +1,23 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Children, isValidElement, useState } from "react";
-import { EASE_CSS, EASE_OUT } from "../motion/presets.js";
-import { BODY, C } from "../theme.js";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Children, cloneElement, isValidElement, useState } from "react";
+import { ALTERNATE, EASE_CSS, EASE_OUT } from "../motion/presets.js";
+import { BODY, C, caption } from "../theme.js";
 
-// Room around the card inside the clipping frame, so the hover lift isn't cut off.
+// Room around the cards inside the clipping stage, so the hover lift isn't cut off.
 const LIFT_ROOM = 18;
 const SWIPE_DISTANCE = 80;
 const SWIPE_VELOCITY = 400;
+const CARD_W = 70; // % of the stage
 
-const slide = {
-  enter: (dir) => ({ x: `${dir * 100}%`, opacity: 0.4 }),
-  center: { x: "0%", opacity: 1 },
-  exit: (dir) => ({ x: `${-dir * 100}%`, opacity: 0.4 }),
-};
+// Cover flow: the front card faces the viewer, its neighbours turn inward and
+// sink back into the sheet like shadows, anything further out is hidden.
+const DIM = "brightness(0.6) blur(1px)";
+function pose(offset) {
+  const side = Math.sign(offset);
+  if (offset === 0) return { x: "0%", scale: 1, rotateY: 0, z: 0, opacity: 1, filter: "brightness(1) blur(0px)", zIndex: 3 };
+  if (Math.abs(offset) === 1) return { x: `${side * 55}%`, scale: 0.8, rotateY: side * -32, z: -120, opacity: 0.6, filter: DIM, zIndex: 2 };
+  return { x: `${side * 90}%`, scale: 0.6, rotateY: side * -40, z: -240, opacity: 0, filter: DIM, zIndex: 1 };
+}
 
 function StepButton({ label, glyph, onClick }) {
   return (
@@ -31,21 +36,22 @@ function StepButton({ label, glyph, onClick }) {
 }
 
 /**
- * Shows one child card at a time. The slide count is simply how many valid
+ * Shows child cards as a cover flow. The slide count is simply how many valid
  * elements are passed in — add or remove a <ProjectCard> and the range, dashes
- * and controls follow. The active card's `description` prop is shown below.
+ * and controls follow. The front card's `description` prop is shown below.
  */
 export default function ProjectCarousel({ children }) {
   const cards = Children.toArray(children).filter(isValidElement);
   const count = cards.length;
-  const [[rawIndex, dir], setPage] = useState([0, 0]);
+  const [rawIndex, setIndex] = useState(0);
+  const reduce = useReducedMotion();
   // Clamp in case cards were removed while a later one was showing.
   const index = count ? Math.min(rawIndex, count - 1) : 0;
 
   if (!count) return null;
 
-  const step = (d) => setPage([(index + d + count) % count, d]);
-  const jump = (n) => n !== index && setPage([n, n > index ? 1 : -1]);
+  const go = (n) => setIndex(n);
+  const step = (d) => go((index + d + count) % count);
   const many = count > 1;
   const description = cards[index].props.description;
 
@@ -58,38 +64,58 @@ export default function ProjectCarousel({ children }) {
           if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
         } : undefined}
         style={{
-          position: "relative", overflow: "hidden", perspective: 900,
-          height: "clamp(170px, 34vh, 400px)", margin: -LIFT_ROOM,
+          position: "relative", overflow: "hidden", perspective: 1100,
+          height: "clamp(200px, 44vh, 500px)", margin: -LIFT_ROOM,
+          maskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)",
+          WebkitMaskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)",
         }}
       >
-        <AnimatePresence initial={false} custom={dir}>
-          <motion.div key={index} custom={dir}
-            variants={slide} initial="enter" animate="center" exit="exit"
-            transition={{ duration: 0.5, ease: EASE_OUT }}
-            drag={many ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.25}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x < -SWIPE_DISTANCE || velocity.x < -SWIPE_VELOCITY) step(1);
-              else if (offset.x > SWIPE_DISTANCE || velocity.x > SWIPE_VELOCITY) step(-1);
-            }}
-            aria-label={`Project ${index + 1} of ${count}`}
-            style={{
-              position: "absolute", inset: LIFT_ROOM, touchAction: "pan-y",
-              cursor: many ? "grab" : undefined,
-            }}
-          >
-            {cards[index]}
-          </motion.div>
-        </AnimatePresence>
+        {cards.map((card, n) => {
+          // Shortest way round, so with 3 cards there is always one on each side.
+          let offset = n - index;
+          if (offset > count / 2) offset -= count;
+          if (offset < -count / 2) offset += count;
+          const front = offset === 0;
+          const peek = Math.abs(offset) === 1;
+          const { zIndex, ...target } = pose(offset);
+
+          return (
+            <motion.div key={card.key ?? n}
+              initial={false}
+              animate={target}
+              transition={{ duration: 0.55, ease: EASE_OUT }}
+              drag={front && many ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.25}
+              onDragEnd={(_, { offset: o, velocity: v }) => {
+                if (o.x < -SWIPE_DISTANCE || v.x < -SWIPE_VELOCITY) step(1);
+                else if (o.x > SWIPE_DISTANCE || v.x > SWIPE_VELOCITY) step(-1);
+              }}
+              onClick={peek ? () => go(n) : undefined}
+              aria-hidden={!front}
+              aria-label={front ? `Project ${index + 1} of ${count}` : undefined}
+              style={{
+                position: "absolute", top: LIFT_ROOM, bottom: LIFT_ROOM,
+                left: `${(100 - CARD_W) / 2}%`, width: `${CARD_W}%`, zIndex,
+                touchAction: "pan-y", transformStyle: "preserve-3d",
+                cursor: front ? (many ? "grab" : undefined) : "pointer",
+                pointerEvents: front || peek ? "auto" : "none",
+              }}
+            >
+              <div style={{ height: "100%", pointerEvents: front ? "auto" : "none" }}>
+                {cloneElement(card, { active: front })}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {many && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 4 }}>
           <StepButton label="Previous project" glyph="←" onClick={() => step(-1)} />
           <div style={{ display: "flex", gap: 6 }}>
             {cards.map((c, n) => (
-              <button key={c.key ?? n} type="button" onClick={() => jump(n)}
+              <button key={c.key ?? n} type="button" onClick={() => go(n)}
                 aria-label={`Show project ${n + 1}`} aria-current={n === index}
                 style={{ padding: "8px 0", border: 0, background: "transparent", cursor: "pointer" }}
               >
@@ -102,6 +128,14 @@ export default function ProjectCarousel({ children }) {
             ))}
           </div>
           <StepButton label="Next project" glyph="→" onClick={() => step(1)} />
+
+          {/* Always there, always blinking (static under reduced motion) */}
+          <motion.span aria-hidden="true"
+            initial={{ opacity: 1 }}
+            animate={reduce ? { opacity: 1 } : { opacity: [1, 0.25] }}
+            transition={reduce ? undefined : { duration: 0.9, ease: EASE_CSS, ...ALTERNATE }}
+            style={{ ...caption, color: C.signal, marginLeft: "auto", whiteSpace: "nowrap" }}
+          >Swipe to see other projects →</motion.span>
         </div>
       )}
 
