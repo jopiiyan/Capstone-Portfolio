@@ -24,17 +24,13 @@ export default function Hero({ axisRef, teamName }) {
             margin: 0, maxWidth: "8em",
           }}>We build the cell that fixes your line.</h1>
 
-          {/* Dimension line under the headline. @keyframes rule */}
+          {/* Dimension line under the headline — drawn, not animated. */}
           <div style={{
             display: "flex", alignItems: "center", gap: 12,
             margin: "clamp(18px, 3.4vh, 30px) 0",
           }}>
             <span style={{ width: 1, height: 11, background: C.line }} />
-            <motion.span
-              style={{ height: 1, width: 120, background: C.line, transformOrigin: "left" }}
-              animate={{ scaleX: [0.2, 1, 0.2], opacity: [0.4, 1, 0.4] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            />
+            <span style={{ height: 1, width: 120, background: C.line, opacity: 0.7 }} />
             <span style={{ ...caption, color: C.line }}>Capstone 2026</span>
           </div>
 
@@ -63,11 +59,7 @@ export default function Hero({ axisRef, teamName }) {
         ...caption, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
       }}>
         <span>Scroll to meet the team</span>
-        {/* @keyframes cue */}
-        <motion.span style={{ display: "inline-block", color: C.line }}
-          animate={{ y: [0, 8, 0], opacity: [0.45, 1, 0.45] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        >↓</motion.span>
+        <span style={{ display: "inline-block", color: C.line }}>↓</span>
         <span>Industrial automation and robotics</span>
       </div>
     </section>

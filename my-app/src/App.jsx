@@ -1,9 +1,9 @@
-import { useRef } from "react";
-import AmbientField from "./components/AmbientField.jsx";
+import { useCallback, useRef } from "react";
 import ArmCanvas from "./components/ArmCanvas.jsx";
 import Capabilities from "./components/Capabilities.jsx";
 import Contact from "./components/Contact.jsx";
 import Hero from "./components/Hero.jsx";
+import MeetTheTeam from "./components/MeetTheTeam.jsx";
 import Nav from "./components/Nav.jsx";
 import Stack from "./components/Stack.jsx";
 import TeamStage from "./components/TeamStage.jsx";
@@ -20,16 +20,20 @@ export default function App({ teamName = "Capstone Team", snapScroll = true }) {
   const applySnap = useScrollSnap(snapScroll);
   const { active, railRef, goTo } = useActiveMember(MEMBERS.length, applySnap);
 
+  // The Meet-the-Team arrow drops the visitor on the first member, where the
+  // project showcase lives. goTo handles suspending scroll-snap for the ride.
+  const goToShowcase = useCallback(() => goTo(0), [goTo]);
+
   return (
     <div style={{
       position: "relative", background: C.ink, color: C.paper, fontFamily: BODY,
       minHeight: "100vh",
     }}>
       <ArmCanvas axisRef={axisRef} />
-      <AmbientField />
       <Nav teamName={teamName} />
 
       <Hero axisRef={axisRef} teamName={teamName} />
+      <MeetTheTeam onAdvance={goToShowcase} />
       <TeamStage active={active} railRef={railRef} goTo={goTo} />
       <Capabilities />
       <Stack />

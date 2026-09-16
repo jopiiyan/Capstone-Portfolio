@@ -1,20 +1,29 @@
 import { useEffect, useRef } from "react";
 import {
-  armFrame, buildAmbient, buildParticles, memberAt, stageAt, transformModel,
+  armFrame, buildAmbient, buildParticles, burstAt, DUST_EXIT, MEET_START, MEET_VH,
+  meetTravelAt, transformModel,
 } from "../scene/armScene.js";
 
+// The arm and its particles hold this alpha for the whole of the hero and the
+// Meet-the-Team pin. Deliberately not `fade`, which sits the ambient field back
+// at y = 2 — that is mid-hold, where the particles should be at their fullest.
+const ARM_ALPHA = 0.9;
+
 /**
- * The `DCLogic` class's draw loop, ported verbatim. Every mutable field is a
- * ref rather than state — this runs at 60fps and must never trigger a render.
- * The axis readout stays an imperative textContent write for the same reason.
+ * The canvas draw loop. Every mutable field is a ref rather than state — this
+ * runs at 60fps and must never trigger a render. The axis readout stays an
+ * imperative textContent write for the same reason.
+ *
+ * Two things are drawn: the arm (hero only, coming apart across the
+ * Meet-the-Team pin) and the ambient triangle field (always, faint once the
+ * arm is gone). Once the burst finishes, the arm's 900 particles and its
+ * kinematics are skipped entirely, so the team stage costs the field alone.
  */
 export function useArmScene(canvasRef, axisRef) {
-  const stageRef = useRef({ from: 0, to: 0, p: 0 });
-  const fadeRef = useRef(1);
+  const burstRef = useRef(0);
+  const travelRef = useRef(0);
   const heroRef = useRef(1);
-  // Horizontal home of the model as a fraction of the width: right by default,
-  // and on the team stage it follows the profile (left for even members).
-  const sideRef = useRef(0.7);
+  const fadeRef = useRef(0.9);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,7 +33,8 @@ export function useArmScene(canvasRef, axisRef) {
     const parts = buildParticles(9182736);
     const amb = buildAmbient(31415, 170);
     let heroNow = 1;
-    let sideNow = null;
+    let burstNow = null;
+    let travelNow = null;
     let fadeNow = null;
     let lastT = 0;
     let tick = 0;
@@ -45,11 +55,11 @@ export function useArmScene(canvasRef, axisRef) {
 
     const onScroll = () => {
       const y = window.scrollY / Math.max(1, window.innerHeight);
-      stageRef.current = stageAt(y);
-      fadeRef.current = y < 0.9 ? 0.9 : y < 7.9 ? 0.3 : y < 9.9 ? 0.26 : 0.45;
+      burstRef.current = burstAt(y);
+      travelRef.current = meetTravelAt(y);
+      // Field sits back as the stage unpins, so the team reads against it.
+      fadeRef.current = y < MEET_START + MEET_VH - 1 ? 0.9 : 0.3;
       heroRef.current = Math.max(0, Math.min(1, 1 - y / 0.85));
-      const m = memberAt(y);
-      sideRef.current = m >= 0 && m % 2 === 0 ? 0.3 : 0.7;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -59,22 +69,22 @@ export function useArmScene(canvasRef, axisRef) {
       raf = requestAnimationFrame(draw);
       if (!ctx || !box) return;
       const t = (now - t0) / 1000;
-      const st = stageRef.current;
       fadeNow = fadeNow == null ? fadeRef.current : fadeNow + (fadeRef.current - fadeNow) * 0.08;
+      burstNow = burstNow == null ? burstRef.current : burstNow + (burstRef.current - burstNow) * 0.12;
+      travelNow = travelNow == null ? travelRef.current : travelNow + (travelRef.current - travelNow) * 0.12;
       ctx.clearRect(0, 0, box.w, box.h);
+
       const S = Math.min(box.w * 0.62, box.h) / 2.9;
-      // Glide between sides rather than jumping; narrow screens keep one fixed spot.
-      sideNow = sideNow == null ? sideRef.current : sideNow + (sideRef.current - sideNow) * 0.06;
-      const cx = box.w * (box.w > 900 ? sideNow : 0.62), cy = box.h * 0.62;
-      const scatterAmt = 1 - Math.abs(2 * st.p - 1);
-      const half = st.p < 0.5;
-      const kRaw = half ? st.p * 2 : st.p * 2 - 1;
-      const kk = kRaw * kRaw * (3 - 2 * kRaw);
-      const mi = half ? st.from : st.to;
-      const M = transformModel(mi, t);
-      const EP = M.ep;
+      const cx = box.w * (box.w > 900 ? 0.7 : 0.62), cy = box.h * 0.62;
+      // Smoothstep: the particles leave the arm slowly, then let go. Done by
+      // the time the hero is gone, so the section opens on a loose field.
+      const b = burstNow;
+      const kk = b * b * (3 - 2 * b);
+      // The field then holds, lit, for the whole pin, and clears only on the
+      // way out — a beat behind the copy it was sitting behind.
+      const dust = 1 - Math.max(0, Math.min(1, (travelNow - DUST_EXIT[0]) / (DUST_EXIT[1] - DUST_EXIT[0])));
       const bob = Math.sin(t * 0.5) * box.h * 0.014;
-      const baseRot = 0.55 * Math.sin(t * 0.19) + 0.12 * Math.sin(t * 0.63) + st.p * 1.1;
+      const baseRot = 0.55 * Math.sin(t * 0.19) + 0.12 * Math.sin(t * 0.63) + b * 1.1;
       const cB = Math.cos(baseRot), sB = Math.sin(baseRot);
       const fade = fadeNow;
 
@@ -123,71 +133,82 @@ export function useArmScene(canvasRef, axisRef) {
         ctx.lineTo(cx + S * 1.4, sy);
         ctx.stroke();
         // pulse at the gripper
-        if (mi === 0) {
-          const fdA = armFrame(t);
-          const wx = fdA.W0[0] * 0.92, wy = (fdA.W0[1] - 0.8) * 0.92;
-          proj(wx, wy, 0, px1);
-          for (let k = 0; k < 2; k++) {
-            const ph = ((t * 0.5 + k * 0.5) % 1);
-            ctx.globalAlpha = (1 - ph) * 0.35 * hero;
-            ctx.strokeStyle = "#F2B705";
-            ctx.beginPath();
-            ctx.arc(px1[0], px1[1], 6 + ph * S * 0.3, 0, Math.PI * 2);
-            ctx.stroke();
-          }
+        const fdA = armFrame(t);
+        const wx = fdA.W0[0] * 0.92, wy = (fdA.W0[1] - 0.8) * 0.92;
+        proj(wx, wy, 0, px1);
+        for (let k = 0; k < 2; k++) {
+          const ph = ((t * 0.5 + k * 0.5) % 1);
+          ctx.globalAlpha = (1 - ph) * 0.35 * hero;
+          ctx.strokeStyle = "#F2B705";
+          ctx.beginPath();
+          ctx.arc(px1[0], px1[1], 6 + ph * S * 0.3, 0, Math.PI * 2);
+          ctx.stroke();
         }
       }
 
       if (axisRef.current && hero > 0.05 && (tick = tick + 1) % 6 === 0) {
         const fdB = armFrame(t);
-        const deg = (v) => { const d = v * 57.2958; return ((d < 0 ? "\u2212" : "+") + Math.abs(d).toFixed(1)).padStart(6, " "); };
+        const deg = (v) => { const d = v * 57.2958; return ((d < 0 ? "−" : "+") + Math.abs(d).toFixed(1)).padStart(6, " "); };
         axisRef.current.textContent = "J1 " + deg(fdB.A1) + "°    J2 " + deg(fdB.A2) + "°    J3 " + deg(fdB.A3) + "°";
       }
 
-      const la = (1 - scatterAmt) * fade * 0.42;
-      if (la > 0.012) {
-        ctx.globalAlpha = la;
-        ctx.strokeStyle = "#9DBBA2";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let s = 0; s < M.segs.length; s++) {
-          const o6 = s * 6;
-          proj(EP[o6], EP[o6 + 1], EP[o6 + 2], px1);
-          proj(EP[o6 + 3], EP[o6 + 4], EP[o6 + 5], px2);
-          ctx.moveTo(px1[0], px1[1]);
-          ctx.lineTo(px2[0], px2[1]);
+      // Below the Meet-the-Team pin there is no arm left to draw at all.
+      if (dust > 0.012) {
+        const M = transformModel(t);
+        const EP = M.ep;
+
+        const la = (1 - kk) * ARM_ALPHA * 0.42;
+        if (la > 0.012) {
+          ctx.globalAlpha = la;
+          ctx.strokeStyle = "#9DBBA2";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let s = 0; s < M.segs.length; s++) {
+            const o6 = s * 6;
+            proj(EP[o6], EP[o6 + 1], EP[o6 + 2], px1);
+            proj(EP[o6 + 3], EP[o6 + 4], EP[o6 + 5], px2);
+            ctx.moveTo(px1[0], px1[1]);
+            ctx.lineTo(px2[0], px2[1]);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
+
+        for (let i = 0; i < parts.length; i++) {
+          const p = parts[i];
+          const sp = M.samp[i], s6 = sp.si * 6, u = sp.u;
+          let X = EP[s6] + (EP[s6 + 3] - EP[s6]) * u;
+          let Y = EP[s6 + 1] + (EP[s6 + 4] - EP[s6 + 1]) * u;
+          let Z = EP[s6 + 2] + (EP[s6 + 5] - EP[s6 + 2]) * u;
+          // Toward each particle's scatter home as the burst advances.
+          X += (p.sx - X) * kk; Y += (p.sy - Y) * kk; Z += (p.sz - Z) * kk;
+          const j = 0.008 * Math.sin(t * 1.6 + p.ph);
+          X += j; Y += j * 0.7;
+          // Once they are free of the arm they wander on their own slow sines,
+          // so the field stays alive for as long as "Meet the team" holds.
+          const fl = 0.06 * kk;
+          X += fl * Math.sin(t * 0.4 + p.ph);
+          Y += fl * 0.8 * Math.cos(t * 0.33 + p.ph * 1.3);
+          Z += fl * 0.7 * Math.sin(t * 0.27 + p.ph * 0.7);
+          const XR = X * cB + Z * sB, ZR = -X * sB + Z * cB;
+          const persp = 4.6 / (4.6 + ZR);
+          const pxx = cx + XR * persp * S, pyy = cy + bob - Y * persp * S;
+          const rad = Math.max(0.9, p.size * persp * S);
+          const ang = p.spin + t * p.spd * (0.25 + kk * 2.4);
+          const tw = 0.55 + 0.45 * Math.sin(t * 1.1 + p.ph) * 0.5;
+          ctx.globalAlpha = Math.max(0, Math.min(1, tw * (0.4 + 0.6 * persp) * ARM_ALPHA * dust));
+          ctx.strokeStyle = p.c;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let k = 0; k < 3; k++) {
+            const a = ang + (k * 2 * Math.PI) / 3;
+            const qx = pxx + rad * Math.cos(a), qy = pyy + rad * Math.sin(a);
+            if (k === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
       }
 
-      for (let i = 0; i < parts.length; i++) {
-        const p = parts[i];
-        const sp = M.samp[i], s6 = sp.si * 6, u = sp.u;
-        let X = EP[s6] + (EP[s6 + 3] - EP[s6]) * u;
-        let Y = EP[s6 + 1] + (EP[s6 + 4] - EP[s6 + 1]) * u;
-        let Z = EP[s6 + 2] + (EP[s6 + 5] - EP[s6 + 2]) * u;
-        if (half) { X += (p.sx - X) * kk; Y += (p.sy - Y) * kk; Z += (p.sz - Z) * kk; }
-        else { X = p.sx + (X - p.sx) * kk; Y = p.sy + (Y - p.sy) * kk; Z = p.sz + (Z - p.sz) * kk; }
-        const j = 0.008 * Math.sin(t * 1.6 + p.ph);
-        X += j; Y += j * 0.7;
-        const XR = X * cB + Z * sB, ZR = -X * sB + Z * cB;
-        const persp = 4.6 / (4.6 + ZR);
-        const pxx = cx + XR * persp * S, pyy = cy + bob - Y * persp * S;
-        const rad = Math.max(0.9, p.size * persp * S);
-        const ang = p.spin + t * p.spd * (0.25 + scatterAmt * 2.4);
-        const tw = 0.55 + 0.45 * Math.sin(t * 1.1 + p.ph) * 0.5;
-        ctx.globalAlpha = Math.max(0, Math.min(1, tw * (0.4 + 0.6 * persp) * fade));
-        ctx.strokeStyle = p.c;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let k = 0; k < 3; k++) {
-          const a = ang + (k * 2 * Math.PI) / 3;
-          const qx = pxx + rad * Math.cos(a), qy = pyy + rad * Math.sin(a);
-          if (k === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
       // drifting ambient field
       const dt = Math.min(0.05, lastT ? (t - lastT) : 0.016);
       lastT = t;

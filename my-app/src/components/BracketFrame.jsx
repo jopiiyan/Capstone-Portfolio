@@ -2,18 +2,15 @@ import { motion } from "framer-motion";
 import { EASE_OUT } from "../motion/presets.js";
 import { C, caption } from "../theme.js";
 
-// Each corner ran TWO CSS animations on one element: `brk` (700ms entry, fill
-// `both`) then `brkPulse` (4.5s infinite), both writing `opacity`. brk always
-// reaches opacity 1 before its pulse's delay elapses, so nesting the two —
-// outer runs the entry, inner loops the pulse — multiplies to exactly the same
-// values CSS produced by override. Borders live on the inner element so the
-// pulse actually fades them; transform-origin stays on the outer, scaled one.
+// Each corner scales into place once and then holds. (The design also looped a
+// 4.5s `brkPulse` on top; it was dropped to quiet the page down.) Borders live
+// on the inner element, transform-origin on the outer, scaled one.
 const B = `1px solid ${C.line}`;
 const CORNERS = [
-  { pos: { top: 0, left: 0 },     origin: "top left",     border: { borderLeft: B, borderTop: B },     brk: 0,    pulse: 0.7 },
-  { pos: { top: 0, right: 0 },    origin: "top right",    border: { borderRight: B, borderTop: B },    brk: 0.12, pulse: 1.0 },
-  { pos: { bottom: 0, left: 0 },  origin: "bottom left",  border: { borderLeft: B, borderBottom: B },  brk: 0.24, pulse: 1.4 },
-  { pos: { bottom: 0, right: 0 }, origin: "bottom right", border: { borderRight: B, borderBottom: B }, brk: 0.36, pulse: 1.8 },
+  { pos: { top: 0, left: 0 },     origin: "top left",     border: { borderLeft: B, borderTop: B },     brk: 0 },
+  { pos: { top: 0, right: 0 },    origin: "top right",    border: { borderRight: B, borderTop: B },    brk: 0.12 },
+  { pos: { bottom: 0, left: 0 },  origin: "bottom left",  border: { borderLeft: B, borderBottom: B },  brk: 0.24 },
+  { pos: { bottom: 0, right: 0 }, origin: "bottom right", border: { borderRight: B, borderBottom: B }, brk: 0.36 },
 ];
 
 export default function BracketFrame({ teamName }) {
@@ -26,11 +23,7 @@ export default function BracketFrame({ teamName }) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: c.brk, ease: EASE_OUT }}
         >
-          <motion.span
-            style={{ display: "block", width: "100%", height: "100%", ...c.border }}
-            animate={{ opacity: [0.75, 0.3, 0.75] }}
-            transition={{ duration: 4.5, delay: c.pulse, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <span style={{ display: "block", width: "100%", height: "100%", opacity: 0.75, ...c.border }} />
         </motion.span>
       ))}
 

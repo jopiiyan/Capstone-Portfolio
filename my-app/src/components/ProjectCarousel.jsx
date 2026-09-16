@@ -1,6 +1,6 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Children, cloneElement, isValidElement, useState } from "react";
-import { ALTERNATE, EASE_CSS, EASE_OUT } from "../motion/presets.js";
+import { EASE_CSS, EASE_OUT } from "../motion/presets.js";
 import { BODY, C, caption } from "../theme.js";
 
 // Room around the cards inside the clipping stage, so the hover lift isn't cut off.
@@ -44,7 +44,6 @@ export default function ProjectCarousel({ children }) {
   const cards = Children.toArray(children).filter(isValidElement);
   const count = cards.length;
   const [rawIndex, setIndex] = useState(0);
-  const reduce = useReducedMotion();
   // Clamp in case cards were removed while a later one was showing.
   const index = count ? Math.min(rawIndex, count - 1) : 0;
 
@@ -129,13 +128,9 @@ export default function ProjectCarousel({ children }) {
           </div>
           <StepButton label="Next project" glyph="→" onClick={() => step(1)} />
 
-          {/* Always there, always blinking (static under reduced motion) */}
-          <motion.span aria-hidden="true"
-            initial={{ opacity: 1 }}
-            animate={reduce ? { opacity: 1 } : { opacity: [1, 0.25] }}
-            transition={reduce ? undefined : { duration: 0.9, ease: EASE_CSS, ...ALTERNATE }}
+          <span aria-hidden="true"
             style={{ ...caption, color: C.signal, marginLeft: "auto", whiteSpace: "nowrap" }}
-          >Swipe to see other projects →</motion.span>
+          >Swipe to see other projects →</span>
         </div>
       )}
 
