@@ -1,14 +1,15 @@
 // Machine-tool palette: black sheet, hammertone-green linework, bone text, and
 // one push-button yellow reserved for the things a visitor should press.
 export const C = {
-  ink: "#000000",
-  paper: "#EFEADF",
-  line: "#9DBBA2",
-  dim: "#A3A69C",
-  faint: "#2C322D",
-  signal: "#F2B705",
-  signalDeep: "#FFC928",
-  signalSide: "#7A5C00",
+  ink: "var(--surface)",
+  paper: "var(--text)",
+  line: "var(--line)",
+  dim: "var(--dim)",
+  faint: "var(--faint)",
+  signal: "var(--signal)",
+  signalDeep: "var(--signal-deep)",
+  signalSide: "var(--signal-side)",
+  onSignal: "var(--on-signal)",
 };
 
 export const signalRgba = (a) => `rgba(242,183,5,${a})`;

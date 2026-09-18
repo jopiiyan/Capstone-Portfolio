@@ -15,7 +15,7 @@ export default function PushButton({ href, children, size = "md", glow = false }
       style={{
         position: "relative", display: "inline-block", verticalAlign: "top",
         paddingBottom: depth, borderRadius: 7, background: C.signalSide,
-        color: C.ink, textDecoration: "none",
+        color: C.onSignal, textDecoration: "none",
       }}
       // @keyframes ctaGlow, recoloured; only the hero button carries it.
       animate={glow ? { boxShadow: [
