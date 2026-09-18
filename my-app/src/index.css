@@ -1,16 +1,52 @@
 /* Everything from the design's <style> block except the @keyframes — all
    fourteen of those now live in framer-motion (see src/motion/presets.js). */
+:root {
+  --surface: #FFFFFF;
+  --canvas: #E4EFF9;
+  --accent: #2563EB;
+  --text: #0F172A;
+  --line: #64748B;
+  --dim: #94A3B8;
+  --faint: #D7E3EF;
+  --signal: #F2B705;
+  --signal-deep: #FFC928;
+  --signal-side: #7A5C00;
+  --on-signal: #0F172A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1E2430;
+    --canvas: #12151A;
+    --accent: #38BDF8;
+    --text: #F8FAFC;
+    --line: #94A3B8;
+    --dim: #7C8AA0;
+    --faint: #2A3242;
+  }
+}
+
+:root[data-theme="dark"] {
+  --surface: #1E2430;
+  --canvas: #12151A;
+  --accent: #38BDF8;
+  --text: #F8FAFC;
+  --line: #94A3B8;
+  --dim: #7C8AA0;
+  --faint: #2A3242;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 h1, h2, h3 { font-family: 'Big Shoulders Display', 'Arial Narrow', ui-sans-serif, sans-serif; }
-html { scroll-behavior: smooth; background: #000000; }
+html { scroll-behavior: smooth; background: var(--surface); }
 body {
-  margin: 0; background: #000000; color: #EFEADF;
+  margin: 0; background: var(--surface); color: var(--text);
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
-a { color: #F2B705; text-decoration: none; }
-a:hover { color: #EFEADF; }
-::selection { background: rgba(157, 187, 162, 0.4); }
-:focus-visible { outline: 2px solid #F2B705; outline-offset: 3px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--text); }
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
