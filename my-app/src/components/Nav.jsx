@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { HOVER_INSTANT } from "../motion/presets.js";
 import PushButton from "./PushButton.jsx";
 import { BODY, C } from "../theme.js";
+import { useTheme } from "../hooks/useTheme.js";
 
 const link = { fontFamily: BODY, fontSize: 16, fontWeight: 500, lineHeight: 1 };
 
@@ -12,11 +13,13 @@ const NAV_LINKS = [
 ];
 
 export default function Nav({ teamName }) {
+  const [theme, toggleTheme] = useTheme();
+
   return (
     <div className="nav" style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 30, display: "flex",
       alignItems: "center", gap: 28, padding: "22px 36px",
-      background: "linear-gradient(#000000 55%, rgba(0,0,0,0))",
+      background: "linear-gradient(var(--surface) 55%, transparent)",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: "auto" }}>
         {/* Registration mark */}
@@ -35,6 +38,20 @@ export default function Nav({ teamName }) {
           transition={HOVER_INSTANT}
         >{l.text}</motion.a>
       ))}
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.faint}`,
+          background: "transparent", color: C.paper, cursor: "pointer", padding: 0,
+          fontSize: 15, lineHeight: 1,
+        }}
+      >
+        {theme === "dark" ? "☀" : "☾"}
+      </button>
 
       <PushButton href="#contact" size="sm">Contact us</PushButton>
     </div>
