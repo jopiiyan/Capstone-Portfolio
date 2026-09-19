@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import ImageSlot from "./ImageSlot.jsx";
-import { C, displayH } from "../theme.js";
+import { C, RADIUS, displayH } from "../theme.js";
 
 const SHADOW_REST = "0 0 0 0 rgba(0,0,0,0), 0 0 0 1px rgba(0,0,0,0)";
 const SHADOW_LIFT = `0 24px 48px rgba(0,0,0,0.6), 0 0 0 1px ${C.line}`;
@@ -25,7 +25,8 @@ export default function ProjectCard({ title, photo, active = true }) {
       style={{
         height: "100%", display: "grid", gridTemplateRows: "minmax(0, 1fr) auto",
         // Side cards get the green frame so their outline still reads through the dimming.
-        background: C.ink, border: `1px solid ${active ? C.faint : C.line}`, transformStyle: "preserve-3d",
+        background: C.ink, border: `1px solid ${active ? C.faint : C.line}`,
+        borderRadius: RADIUS, transformStyle: "preserve-3d",
       }}
     >
       <ImageSlot src={photo || undefined} alt={title} placeholder="Project photo" />

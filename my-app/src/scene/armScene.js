@@ -151,19 +151,25 @@ export function transformModel(t) {
   return MODEL;
 }
 
-export function buildAmbient(seed, n) {
+// `motion` scales how fast the field drifts and spins. A page with no arm on it
+// leans on this field for its whole background, so it runs livelier there.
+export function buildAmbient(seed, n, motion = 1, sizeMul = 1) {
   const r = rand(seed);
   const out = [];
   for (let i = 0; i < n; i++) {
     const z = 0.25 + r() * 0.75;
-    out.push({
+    const a = {
       x: r(), y: r(), z: z,
-      vx: (r() - 0.5) * 0.014 * z, vy: (r() - 0.5) * 0.012 * z,
-      size: (1.6 + r() * 4.2) * z,
-      spin: r() * Math.PI * 2, spd: (r() - 0.5) * 0.9,
+      vx: (r() - 0.5) * 0.014 * z * motion, vy: (r() - 0.5) * 0.012 * z * motion,
+      size: (1.6 + r() * 4.2) * z * sizeMul,
+      spin: r() * Math.PI * 2, spd: (r() - 0.5) * 0.9 * motion,
       ph: r() * Math.PI * 2,
-      c: PARTICLE_COLORS[Math.floor(r() * PARTICLE_COLORS.length)]
-    });
+    };
+    // The draw is kept so the colour can be resolved against a palette of any
+    // length at draw time; `c` stays as the original fixed pick.
+    a.cr = r();
+    a.c = PARTICLE_COLORS[Math.floor(a.cr * PARTICLE_COLORS.length)];
+    out.push(a);
   }
   return out;
 }

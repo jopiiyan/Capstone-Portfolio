@@ -1,9 +1,9 @@
 import { useRef } from "react";
 import { useArmScene } from "../hooks/useArmScene.js";
 
-export default function ArmCanvas({ axisRef }) {
+export default function ArmCanvas({ axisRef, ambientOnly = false }) {
   const canvasRef = useRef(null);
-  useArmScene(canvasRef, axisRef);
+  useArmScene(canvasRef, axisRef, ambientOnly);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>

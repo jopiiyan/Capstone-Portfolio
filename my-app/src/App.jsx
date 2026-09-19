@@ -1,43 +1,56 @@
-import { useCallback, useRef } from "react";
-import ArmCanvas from "./components/ArmCanvas.jsx";
-import Capabilities from "./components/Capabilities.jsx";
-import Contact from "./components/Contact.jsx";
-import Hero from "./components/Hero.jsx";
-import MeetTheTeam from "./components/MeetTheTeam.jsx";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import Nav from "./components/Nav.jsx";
-import Stack from "./components/Stack.jsx";
-import TeamStage from "./components/TeamStage.jsx";
-import { MEMBERS } from "./data.js";
-import { useActiveMember } from "./hooks/useActiveMember.js";
-import { useScrollSnap } from "./hooks/useScrollSnap.js";
+import OverviewTab from "./components/OverviewTab.jsx";
+import TeamProjectsTab from "./components/TeamProjectsTab.jsx";
 import { BODY, C } from "./theme.js";
 
+/**
+ * Two-tab shell. The tab is plain local state — no router and no URL change,
+ * so a refresh always lands on the overview.
+ *
+ * Each tab owns its own scroll behaviour: TeamProjectsTab holds the snap and
+ * active-member hooks (and the canvas), so switching away tears them down and
+ * switching back rebuilds them against fresh DOM.
+ */
 export default function App({ teamName = "Capstone Team", snapScroll = true }) {
-  // Shared between Hero (which owns the node) and the canvas loop (which writes
-  // to it 10× a second without going through React).
-  const axisRef = useRef(null);
+  const [tab, setTab] = useState("overview");
 
-  const applySnap = useScrollSnap(snapScroll);
-  const { active, railRef, goTo } = useActiveMember(MEMBERS.length, applySnap);
+  // A nav link like #capabilities points at a section that only exists once the
+  // team tab has rendered, so the target is parked here and consumed by the
+  // layout effect below, after the new tab is in the DOM.
+  const pendingAnchor = useRef(null);
 
-  // The Meet-the-Team arrow drops the visitor on the first member, where the
-  // project showcase lives. goTo handles suspending scroll-snap for the ride.
-  const goToShowcase = useCallback(() => goTo(0), [goTo]);
+  useLayoutEffect(() => {
+    const anchor = pendingAnchor.current;
+    pendingAnchor.current = null;
+
+    const el = anchor ? document.querySelector(anchor) : null;
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    // "instant" rather than "auto": html carries scroll-behavior: smooth, and a
+    // tab switch should not animate the whole previous page past the visitor.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [tab]);
+
+  const goToTab = useCallback((id, anchor = null) => {
+    pendingAnchor.current = anchor;
+    setTab(id);
+  }, []);
+
+  const goToTeam = useCallback(() => goToTab("team"), [goToTab]);
 
   return (
     <div style={{
-      position: "relative", background: C.ink, color: C.paper, fontFamily: BODY,
+      position: "relative", background: C.canvas, color: C.paper, fontFamily: BODY,
       minHeight: "100vh",
     }}>
-      <ArmCanvas axisRef={axisRef} />
-      <Nav teamName={teamName} />
+      <Nav teamName={teamName} tab={tab} onTab={goToTab} />
 
-      <Hero axisRef={axisRef} teamName={teamName} />
-      <MeetTheTeam onAdvance={goToShowcase} />
-      <TeamStage active={active} railRef={railRef} goTo={goTo} />
-      <Capabilities />
-      <Stack />
-      <Contact teamName={teamName} />
+      {tab === "overview"
+        ? <OverviewTab onExplore={goToTeam} />
+        : <TeamProjectsTab teamName={teamName} snapScroll={snapScroll} />}
     </div>
   );
 }

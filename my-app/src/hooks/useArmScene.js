@@ -9,6 +9,30 @@ import {
 // at y = 2 — that is mid-hold, where the particles should be at their fullest.
 const ARM_ALPHA = 0.9;
 
+// Behind the hero the field is a texture under the arm, so it stays sparse,
+// slow and faint. Carrying a page on its own it has to be the thing worth
+// watching: denser, quicker, larger and brighter.
+const FIELD = { count: 170, motion: 1, size: 1, alpha: 1 };
+// Tuning knobs for the solo field, in one place: how many, how fast they
+// drift and spin, how large, and how strongly they read against the page.
+const FIELD_SOLO = { count: 380, motion: 2.2, size: 1.4, alpha: 1.55 };
+
+/**
+ * Ambient triangle colours taken from the live palette.
+ *
+ * PARTICLE_COLORS is the original machine-tool set — greens and bone, picked
+ * for a near-black page. On the light Cool Slate surface they all but vanish,
+ * so a field that has to carry a background reads off --accent/--line/--dim
+ * instead, which are contrast-checked against the page in both modes. Accent
+ * is weighted heaviest because it is the one saturated colour of the three.
+ */
+const readFieldPalette = () => {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (k) => cs.getPropertyValue(k).trim();
+  const accent = v("--accent"), line = v("--line"), dim = v("--dim");
+  return [accent, accent, accent, line, line, dim].filter(Boolean);
+};
+
 /**
  * The canvas draw loop. Every mutable field is a ref rather than state — this
  * runs at 60fps and must never trigger a render. The axis readout stays an
@@ -19,10 +43,18 @@ const ARM_ALPHA = 0.9;
  * arm is gone). Once the burst finishes, the arm's 900 particles and its
  * kinematics are skipped entirely, so the team stage costs the field alone.
  */
-export function useArmScene(canvasRef, axisRef) {
-  const burstRef = useRef(0);
-  const travelRef = useRef(0);
-  const heroRef = useRef(1);
+/**
+ * `ambientOnly` draws just the drifting triangle field — the state the scene
+ * settles into by the time the team stage is on screen, once the arm has burst
+ * and its particles have cleared. Pinning the scroll-driven values there lets a
+ * page that has no hero carry the same background without the arm assembling
+ * and coming apart in the wrong places.
+ */
+export function useArmScene(canvasRef, axisRef, ambientOnly = false) {
+  const burstRef = useRef(ambientOnly ? 1 : 0);
+  // Past DUST_EXIT, so the arm and its 900 particles are skipped outright.
+  const travelRef = useRef(ambientOnly ? MEET_VH : 0);
+  const heroRef = useRef(ambientOnly ? 0 : 1);
   const fadeRef = useRef(0.9);
 
   useEffect(() => {
@@ -31,8 +63,20 @@ export function useArmScene(canvasRef, axisRef) {
     const ctx = canvas.getContext("2d");
 
     const parts = buildParticles(9182736);
-    const amb = buildAmbient(31415, 170);
-    let heroNow = 1;
+    const field = ambientOnly ? FIELD_SOLO : FIELD;
+    const amb = buildAmbient(31415, field.count, field.motion, field.size);
+
+    // Resolved at draw time so a theme flip recolours the field in place.
+    let palette = ambientOnly ? readFieldPalette() : null;
+    const reread = () => { palette = readFieldPalette(); };
+    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+    let themeOb = null;
+    if (ambientOnly) {
+      themeOb = new MutationObserver(reread);
+      themeOb.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+      scheme.addEventListener("change", reread);
+    }
+    let heroNow = ambientOnly ? 0 : 1;
     let burstNow = null;
     let travelNow = null;
     let fadeNow = null;
@@ -54,6 +98,9 @@ export function useArmScene(canvasRef, axisRef) {
     ro.observe(canvas);
 
     const onScroll = () => {
+      // In ambient mode the values are fixed; the field still parallaxes off
+      // window.scrollY directly, down in the draw loop.
+      if (ambientOnly) return;
       const y = window.scrollY / Math.max(1, window.innerHeight);
       burstRef.current = burstAt(y);
       travelRef.current = meetTravelAt(y);
@@ -146,7 +193,7 @@ export function useArmScene(canvasRef, axisRef) {
         }
       }
 
-      if (axisRef.current && hero > 0.05 && (tick = tick + 1) % 6 === 0) {
+      if (axisRef?.current && hero > 0.05 && (tick = tick + 1) % 6 === 0) {
         const fdB = armFrame(t);
         const deg = (v) => { const d = v * 57.2958; return ((d < 0 ? "−" : "+") + Math.abs(d).toFixed(1)).padStart(6, " "); };
         axisRef.current.textContent = "J1 " + deg(fdB.A1) + "°    J2 " + deg(fdB.A2) + "°    J3 " + deg(fdB.A3) + "°";
@@ -223,8 +270,9 @@ export function useArmScene(canvasRef, axisRef) {
         const ay = (((a.y - par * a.z) % 1) + 1) % 1 * box.h;
         const rr = a.size;
         const an = a.spin + t * a.spd;
-        ctx.globalAlpha = Math.max(0, (0.12 + 0.5 * a.z) * (0.55 + 0.45 * Math.sin(t * 0.9 + a.ph)) * ambFade);
-        ctx.strokeStyle = a.c;
+        ctx.globalAlpha = Math.max(0, Math.min(1,
+          (0.12 + 0.5 * a.z) * (0.55 + 0.45 * Math.sin(t * 0.9 + a.ph)) * ambFade * field.alpha));
+        ctx.strokeStyle = palette ? palette[Math.floor(a.cr * palette.length)] : a.c;
         ctx.lineWidth = 1;
         ctx.beginPath();
         for (let q = 0; q < 3; q++) {
@@ -246,5 +294,5 @@ export function useArmScene(canvasRef, axisRef) {
       ro.disconnect();
       window.removeEventListener("scroll", onScroll);
     };
-  }, [canvasRef, axisRef]);
+  }, [canvasRef, axisRef, ambientOnly]);
 }

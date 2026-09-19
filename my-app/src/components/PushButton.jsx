@@ -1,27 +1,35 @@
 import { motion } from "framer-motion";
-import { C, DISPLAY, signalRgba } from "../theme.js";
+import { useSignalRgb } from "../hooks/useSignalRgb.js";
+import { C, DISPLAY } from "../theme.js";
 
-// A panel push-button: a dark housing with a yellow cap that sits proud of it
-// and travels down when pressed. The indicator lamp lights on hover.
+// A panel push-button: a dark housing with an accent-coloured cap that sits
+// proud of it and travels down when pressed. The indicator lamp lights on hover.
 const DEPTH = 5;
 
-export default function PushButton({ href, children, size = "md", glow = false }) {
+// Renders an anchor when given an href and a real <button> when given an
+// onClick, so the same cap can carry a link or an in-page action (the overview
+// tab's "Explore the team" switches tabs rather than navigating).
+export default function PushButton({ href, onClick, children, size = "md", glow = false }) {
   const sm = size === "sm";
   const depth = sm ? 4 : DEPTH;
+  const glowRgb = useSignalRgb();
+  const Tag = href ? motion.a : motion.button;
+  const tagProps = href ? { href } : { type: "button", onClick };
 
   return (
-    <motion.a href={href}
+    <Tag {...tagProps}
       initial="rest" whileHover="hover" whileTap="press"
       style={{
         position: "relative", display: "inline-block", verticalAlign: "top",
-        paddingBottom: depth, borderRadius: 7, background: C.signalSide,
+        padding: `0 0 ${depth}px`, borderRadius: 7, background: C.signalSide,
         color: C.onSignal, textDecoration: "none",
+        border: "none", font: "inherit", cursor: "pointer",
       }}
       // @keyframes ctaGlow, recoloured; only the hero button carries it.
       animate={glow ? { boxShadow: [
-        `0 0 0 0 ${signalRgba(0.5)}`,
-        `0 0 0 14px ${signalRgba(0)}`,
-        `0 0 0 0 ${signalRgba(0.5)}`,
+        `0 0 0 0 rgba(${glowRgb}, 0.5)`,
+        `0 0 0 14px rgba(${glowRgb}, 0)`,
+        `0 0 0 0 rgba(${glowRgb}, 0.5)`,
       ] } : undefined}
       transition={glow ? { duration: 3.4, repeat: Infinity, ease: "easeOut" } : undefined}
     >
@@ -43,7 +51,7 @@ export default function PushButton({ href, children, size = "md", glow = false }
         {/* Indicator lamp */}
         <motion.span
           variants={{
-            rest: { backgroundColor: "#3a2c00", boxShadow: "0 0 0 0 rgba(0,0,0,0)" },
+            rest: { backgroundColor: C.signalSide, boxShadow: "0 0 0 0 rgba(0,0,0,0)" },
             hover: { backgroundColor: "#000000", boxShadow: "0 0 0 3px rgba(0,0,0,0.18)" },
             press: { backgroundColor: "#000000", boxShadow: "0 0 0 3px rgba(0,0,0,0.18)" },
           }}
@@ -55,6 +63,6 @@ export default function PushButton({ href, children, size = "md", glow = false }
         />
         {children}
       </motion.span>
-    </motion.a>
+    </Tag>
   );
 }
