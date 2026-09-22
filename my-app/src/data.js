@@ -1,8 +1,15 @@
+// Each project: { title, photo, description, details? }. `description` is the
+// one-line summary under the carousel; `details` is the long-form write-up shown
+// only in the detail sheet — a string, or an array of strings for paragraphs.
 export const MEMBERS = [
   { name: "Tian Wen", photo: "/pic/Tian%20Wen.png", role: "Hardware — Mechanical", major: "EPD", overviewRole: "Hardware (Mechanical)", line: "Designs the structure everything else bolts to, from concept to fabricated part.", chips: ["CAD & tolerancing", "Fabrication", "Mechanism design"],
     stack: ["SolidWorks", "3D print", "Pneumatics"],
     projects: [
-      { title: "Modular Gripper Assembly", photo: "", description: "End-effector for mixed-part handling. Replace with a real outcome." },
+      { title: "Modular Gripper Assembly", photo: "", description: "End-effector for mixed-part handling. Replace with a real outcome.",
+        details: [
+          "Replace with the full write-up: what the problem was, what was designed and built, and what it achieved on the floor.",
+          "A second paragraph is optional — drop `details` entirely and the sheet shows the one-line description on its own.",
+        ] },
       { title: "Conveyor Guarding Frame", photo: "", description: "Aluminium-extrusion safety enclosure around the cell. Replace with a real outcome." },
       { title: "Quick-Change Tool Plate", photo: "", description: "Tool-less swap between gripper heads. Replace with a real outcome." },
     ] },

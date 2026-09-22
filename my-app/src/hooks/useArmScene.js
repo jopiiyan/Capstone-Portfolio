@@ -21,10 +21,10 @@ const FIELD_SOLO = { count: 380, motion: 2.2, size: 1.4, alpha: 1.55 };
  * Ambient triangle colours taken from the live palette.
  *
  * PARTICLE_COLORS is the original machine-tool set — greens and bone, picked
- * for a near-black page. On the light Cool Slate surface they all but vanish,
- * so a field that has to carry a background reads off --accent/--line/--dim
- * instead, which are contrast-checked against the page in both modes. Accent
- * is weighted heaviest because it is the one saturated colour of the three.
+ * for a near-black page. A field that has to carry a background on its own
+ * reads off --accent/--line/--dim instead, which are contrast-checked against
+ * the page. Accent is weighted heaviest because it is the one saturated
+ * colour of the three.
  */
 const readFieldPalette = () => {
   const cs = getComputedStyle(document.documentElement);
@@ -66,16 +66,9 @@ export function useArmScene(canvasRef, axisRef, ambientOnly = false) {
     const field = ambientOnly ? FIELD_SOLO : FIELD;
     const amb = buildAmbient(31415, field.count, field.motion, field.size);
 
-    // Resolved at draw time so a theme flip recolours the field in place.
-    let palette = ambientOnly ? readFieldPalette() : null;
-    const reread = () => { palette = readFieldPalette(); };
-    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-    let themeOb = null;
-    if (ambientOnly) {
-      themeOb = new MutationObserver(reread);
-      themeOb.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-      scheme.addEventListener("change", reread);
-    }
+    // Read off the stylesheet rather than hard-coded, so index.css stays the
+    // single source of truth for the palette.
+    const palette = ambientOnly ? readFieldPalette() : null;
     let heroNow = ambientOnly ? 0 : 1;
     let burstNow = null;
     let travelNow = null;

@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { EASE_OUT, HOVER_INSTANT } from "../motion/presets.js";
 import PushButton from "./PushButton.jsx";
 import { BODY, C } from "../theme.js";
-import { useTheme } from "../hooks/useTheme.js";
 
 const link = { fontFamily: BODY, fontSize: 16, fontWeight: 500, lineHeight: 1 };
 
@@ -19,8 +18,6 @@ const NAV_LINKS = [
 ];
 
 export default function Nav({ teamName, tab, onTab }) {
-  const [theme, toggleTheme] = useTheme();
-
   // On the team tab these anchors resolve natively. From the overview tab the
   // target does not exist yet, so the tab switch has to carry the anchor with it.
   const onLink = (e, href) => {
@@ -82,20 +79,6 @@ export default function Nav({ teamName, tab, onTab }) {
           onClick={(e) => onLink(e, l.href)}
         >{l.text}</motion.a>
       ))}
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          width: 32, height: 32, borderRadius: "50%", border: `1px solid ${C.faint}`,
-          background: "transparent", color: C.paper, cursor: "pointer", padding: 0,
-          fontSize: 15, lineHeight: 1,
-        }}
-      >
-        {theme === "dark" ? "☀" : "☾"}
-      </button>
 
       <PushButton href="#contact" size="sm">Contact us</PushButton>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const read = () =>
   getComputedStyle(document.documentElement).getPropertyValue("--signal-rgb").trim();
@@ -13,18 +13,9 @@ const read = () =>
  * document keeps index.css the single source of truth while still handing
  * framer a literal rgba() it can tween.
  *
- * Watches the theme attribute rather than calling useTheme, because useTheme
- * holds its own state per caller — a second instance would never hear about a
- * toggle made by the one in Nav.
+ * The page has one palette, so this is read once on mount and never changes.
  */
 export function useSignalRgb() {
-  const [rgb, setRgb] = useState(read);
-
-  useEffect(() => {
-    const ob = new MutationObserver(() => setRgb(read()));
-    ob.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => ob.disconnect();
-  }, []);
-
+  const [rgb] = useState(read);
   return rgb;
 }

@@ -1,12 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Children, cloneElement, isValidElement, useState } from "react";
+import { Children, cloneElement, isValidElement, useRef, useState } from "react";
+import ProjectDialog from "./ProjectDialog.jsx";
 import { EASE_CSS, EASE_OUT } from "../motion/presets.js";
-import { BODY, C, caption } from "../theme.js";
+import { BODY, C, RADIUS, caption } from "../theme.js";
 
 // Room around the cards inside the clipping stage, so the hover lift isn't cut off.
 const LIFT_ROOM = 18;
 const SWIPE_DISTANCE = 80;
 const SWIPE_VELOCITY = 400;
+// Pointer travel, in px, under which a press still counts as a click, not a drag.
+const CLICK_SLOP = 6;
 const CARD_W = 70; // % of the stage
 
 // Cover flow: the front card faces the viewer, its neighbours turn inward and
@@ -38,12 +41,21 @@ function StepButton({ label, glyph, onClick }) {
 /**
  * Shows child cards as a cover flow. The slide count is simply how many valid
  * elements are passed in — add or remove a <ProjectCard> and the range, dashes
- * and controls follow. The front card's `description` prop is shown below.
+ * and controls follow. The front card's `description` prop is shown below, and
+ * clicking it opens the full detail sheet over a darkened page.
  */
 export default function ProjectCarousel({ children }) {
   const cards = Children.toArray(children).filter(isValidElement);
   const count = cards.length;
   const [rawIndex, setIndex] = useState(0);
+  // { index, origin } while the detail sheet is up. `origin` is the on-screen
+  // box of the pressed card's photo, which the sheet flies out of.
+  const [opened, setOpened] = useState(null);
+  // A swipe ends with a click on the card underneath, so the click that closes
+  // a real drag is swallowed instead of opening the sheet. Measured rather than
+  // a plain "did framer start a drag" flag: pressing a card always jitters a
+  // pixel or two, and that must still count as a click.
+  const draggedRef = useRef(false);
   // Clamp in case cards were removed while a later one was showing.
   const index = count ? Math.min(rawIndex, count - 1) : 0;
 
@@ -53,6 +65,17 @@ export default function ProjectCarousel({ children }) {
   const step = (d) => go((index + d + count) % count);
   const many = count > 1;
   const description = cards[index].props.description;
+  const openProject = opened ? cards[opened.index]?.props ?? null : null;
+
+  const openFront = (e) => {
+    if (draggedRef.current) { draggedRef.current = false; return; }
+    // The front card carries no rotation, so its photo's client rect is the
+    // true on-screen box — which is what the sheet needs to fly from.
+    const photo = e.currentTarget.parentElement?.querySelector("[data-project-photo]");
+    const r = photo?.getBoundingClientRect();
+    const origin = r ? { left: r.left, top: r.top, width: r.width, height: r.height } : null;
+    setOpened({ index, origin });
+  };
 
   return (
     <div aria-roledescription="carousel" style={{ display: "grid", gap: 14 }}>
@@ -86,23 +109,37 @@ export default function ProjectCarousel({ children }) {
               drag={front && many ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.25}
+              onDragStart={() => { draggedRef.current = false; }}
               onDragEnd={(_, { offset: o, velocity: v }) => {
+                draggedRef.current = Math.abs(o.x) > CLICK_SLOP;
                 if (o.x < -SWIPE_DISTANCE || v.x < -SWIPE_VELOCITY) step(1);
                 else if (o.x > SWIPE_DISTANCE || v.x > SWIPE_VELOCITY) step(-1);
               }}
               onClick={peek ? () => go(n) : undefined}
               aria-hidden={!front}
-              aria-label={front ? `Project ${index + 1} of ${count}` : undefined}
               style={{
                 position: "absolute", top: LIFT_ROOM, bottom: LIFT_ROOM,
                 left: `${(100 - CARD_W) / 2}%`, width: `${CARD_W}%`, zIndex,
                 touchAction: "pan-y", transformStyle: "preserve-3d",
-                cursor: front ? (many ? "grab" : undefined) : "pointer",
+                cursor: "pointer",
                 pointerEvents: front || peek ? "auto" : "none",
               }}
             >
-              <div style={{ height: "100%", pointerEvents: front ? "auto" : "none" }}>
+              <div style={{ position: "relative", height: "100%", pointerEvents: front ? "auto" : "none" }}>
                 {cloneElement(card, { active: front })}
+                {/* A real button over the face rather than a handler on the
+                    draggable wrapper: framer owns the pointer there, and the
+                    click it would emit does not survive the gesture. Pointer
+                    events still bubble up to the drag, so swiping is unaffected. */}
+                {front && (
+                  <button type="button" onClick={openFront}
+                    aria-label={`${card.props.title} — project ${index + 1} of ${count}. Open details`}
+                    style={{
+                      position: "absolute", inset: 0, padding: 0, border: 0,
+                      borderRadius: RADIUS, background: "transparent", cursor: "pointer",
+                    }}
+                  />
+                )}
               </div>
             </motion.div>
           );
@@ -134,6 +171,10 @@ export default function ProjectCarousel({ children }) {
         </div>
       )}
 
+      <p style={{ ...caption, margin: 0 }}>
+        Click the project for the full write-up.
+      </p>
+
       <div aria-live="polite" style={{ minHeight: "3em" }}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.p key={index}
@@ -146,6 +187,9 @@ export default function ProjectCarousel({ children }) {
           >{description}</motion.p>
         </AnimatePresence>
       </div>
+
+      <ProjectDialog project={openProject} originRect={opened?.origin ?? null}
+        onClose={() => setOpened(null)} />
     </div>
   );
 }

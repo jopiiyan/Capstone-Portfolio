@@ -1,46 +1,8 @@
 /* Everything from the design's <style> block except the @keyframes — all
    fourteen of those now live in framer-motion (see src/motion/presets.js). */
 :root {
-  --surface: #FFFFFF;
-  --canvas: #E4EFF9;
-  --accent: #2563EB;
-  --text: #0F172A;
-  --line: #64748B;
-  /* Secondary text, so it has to clear 4.5:1 on --canvas. The old #94A3B8 sat
-     at ~2.2:1 against Cool Slate — fine on the original near-black page, not
-     on this one. Kept a step darker than --line so the two stay distinct. */
-  --dim: #475569;
-  --faint: #D7E3EF;
+  color-scheme: dark;
 
-  /* The CTA colour tracks the palette's accent rather than the old fixed
-     yellow, so it now changes with the mode. --signal-deep is the cap on
-     hover, --signal-side the housing it sits proud of (and the unlit
-     indicator lamp), and --signal-rgb the same colour as bare channels for
-     the hero button's glow — see hooks/useSignalRgb.js for why that exists. */
-  --signal: var(--accent);
-  --signal-deep: #1D4ED8;
-  --signal-side: #1E3A8A;
-  --signal-rgb: 37, 99, 235;
-  --on-signal: #FFFFFF;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --surface: #1E2430;
-    --canvas: #12151A;
-    --accent: #38BDF8;
-    --text: #F8FAFC;
-    --line: #94A3B8;
-    --dim: #7C8AA0;
-    --faint: #2A3242;
-    --signal-deep: #7DD3FC;
-    --signal-side: #0C4A6E;
-    --signal-rgb: 56, 189, 248;
-    --on-signal: #0F172A;
-  }
-}
-
-:root[data-theme="dark"] {
   --surface: #1E2430;
   --canvas: #12151A;
   --accent: #38BDF8;
@@ -48,6 +10,12 @@
   --line: #94A3B8;
   --dim: #7C8AA0;
   --faint: #2A3242;
+
+  /* The CTA colour tracks the palette's accent. --signal-deep is the cap on
+     hover, --signal-side the housing it sits proud of (and the unlit
+     indicator lamp), and --signal-rgb the same colour as bare channels for
+     the hero button's glow — see hooks/useSignalRgb.js for why that exists. */
+  --signal: var(--accent);
   --signal-deep: #7DD3FC;
   --signal-side: #0C4A6E;
   --signal-rgb: 56, 189, 248;
@@ -66,12 +34,10 @@ a:hover { color: var(--text); }
 ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* The supplied SUTD mark is dark ink for light backgrounds; on dark it has to
-   be flipped to read. Swap in the official light lockup if you have one. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .sutd-logo { filter: brightness(0) invert(1); }
-}
-:root[data-theme="dark"] .sutd-logo { filter: brightness(0) invert(1); }
+/* The supplied SUTD mark is dark ink for light backgrounds; the page is dark,
+   so it has to be flipped to read. Swap in the official light lockup if you
+   have one. */
+.sutd-logo { filter: brightness(0) invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -103,3 +69,8 @@ a:hover { color: var(--text); }
   .tabs { gap: 16px !important; }
   .tabs button { font-size: 14px !important; }
 }
+
+/* The detail sheet's write-up scrolls on its own, under a header that does not.
+   macOS overlay scrollbars are invisible at rest, so say it in the gutter. */
+.dialog-prose { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+

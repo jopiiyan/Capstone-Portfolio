@@ -29,7 +29,11 @@ export default function ProjectCard({ title, photo, active = true }) {
         borderRadius: RADIUS, transformStyle: "preserve-3d",
       }}
     >
-      <ImageSlot src={photo || undefined} alt={title} placeholder="Project photo" />
+      {/* data-project-photo: the carousel measures this box to fly the detail
+          sheet out of the thumbnail the visitor pressed. */}
+      <div data-project-photo style={{ minHeight: 0 }}>
+        <ImageSlot src={photo || undefined} alt={title} placeholder="Project photo" />
+      </div>
       <div style={{ padding: "12px 14px", borderTop: `1px solid ${C.faint}` }}>
         <h3 style={{
           ...displayH, fontSize: "clamp(24px, min(3vw, 4.4vh), 40px)", lineHeight: 0.95,
