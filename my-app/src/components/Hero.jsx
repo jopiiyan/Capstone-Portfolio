@@ -4,14 +4,14 @@ import { rise } from "../motion/presets.js";
 import PushButton from "./PushButton.jsx";
 import { C, body, caption, displayH } from "../theme.js";
 
-export default function Hero({ axisRef, teamName }) {
+export default function Hero({ axisRef, teamName, sheets }) {
   return (
     <section data-screen-label="Capstone" style={{
       position: "relative", zIndex: 1, minHeight: "100vh", scrollSnapAlign: "start",
       display: "grid", gridTemplateRows: "1fr auto", gap: 18,
       padding: "clamp(100px, 15vh, 120px) 36px 28px", maxWidth: 1280, margin: "0 auto",
     }}>
-      <BracketFrame teamName={teamName} />
+      <BracketFrame teamName={teamName} sheets={sheets} />
 
       <div className="split" style={{
         display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(0, 0.95fr)",
