@@ -1,6 +1,7 @@
-// Each project: { title, photo, description, details? }. `description` is the
-// one-line summary under the carousel; `details` is the long-form write-up shown
-// only in the detail sheet — a string, or an array of strings for paragraphs.
+// Each project: { title, photo, description, details?, link? }. `description` is
+// the one-line summary under the carousel; `details` is the long-form write-up
+// shown only in the detail sheet — a string, or an array of strings for
+// paragraphs. `link`, when present, is shown under the write-up.
 export const MEMBERS = [
   { name: "Tian Wen", photo: "/pic/Tian%20Wen.png", role: "Hardware — Mechanical", major: "EPD", overviewRole: "Hardware (Mechanical)", line: "Designs the structure everything else bolts to, from concept to fabricated part.", chips: ["CAD & tolerancing", "Fabrication", "Mechanism design"],
     stack: ["SolidWorks", "3D print", "Pneumatics"],
@@ -34,12 +35,27 @@ export const MEMBERS = [
       { title: "Automation ROI Model", photo: "", description: "Cost and payback case for the proposed cell. Replace with a real outcome." },
       { title: "Requirements Specification", photo: "", description: "Traceable requirements from plant visit to test plan. Replace with a real outcome." },
     ] },
-  { name: "Cliffton Owen", photo: "/pic/Cliffton.jpg", role: "AI / ML / Software Engineer", major: "CSD", overviewRole: "AI/ML, Software Engineer", line: "Builds the perception and decision models, and the evidence that they work.", chips: ["Computer vision", "Model training", "Evaluation"],
-    stack: ["PyTorch", "ONNX", "Edge GPU"],
+  { name: "Cliffton Owen Gunawan", photo: "/pic/Cliffton.jpg", website: "https://clifftonowen.me/", role: "AI/ML, Software Engineer", major: "CSD", overviewRole: "AI/ML, Software Engineer", line: "Incoming Data Scientist and Automation Intern at Infineon", chips: ["Machine Learning", "Full-Stack Development", "Data Engineering"],
+    stack: ["PyTorch", "HuggingFace", "FastAPI", "pgvector"],
     projects: [
-      { title: "Defect Detection Model", photo: "", description: "Inline visual inspection classifier. Replace with a real outcome." },
-      { title: "Part Pose Estimation", photo: "", description: "Grasp-point prediction for randomly placed parts. Replace with a real outcome." },
-      { title: "Dataset Labelling Workflow", photo: "", description: "Capture and annotation loop for new part types. Replace with a real outcome." },
+      { title: "ML R&D Intern, Bosch Group (SEA)", photo: "/pic/projects/cliffton-bosch.jpg", description: "Time-series Transformers that predict food weight from oven sensors, reaching R² = 0.982.",
+        details: [
+          "Trained PatchTST time-series Transformers predicting food weight from fused oven sensor streams (cavity temperature, lambda O₂, PID), reaching R² = 0.982 and 40.44 g mean absolute error across 125 samples.",
+          "Built a data pipeline over 441 sensor-log files and used linear baselines to show a linear model could not fit the problem, which justified the move to deep learning. Presented the findings to stakeholders.",
+        ],
+        link: "https://clifftonowen.me/" },
+      { title: "Markpoint", photo: "/pic/projects/cliffton-markpoint.jpg", description: "A solo AI platform that finds every past paper a question has appeared in, then marks answers one mark point at a time.",
+        details: [
+          "Developed and deployed a solo AI platform indexing 30,176 mark points from 315 exam papers, using hybrid PostgreSQL and pgvector retrieval with LLM-based marking.",
+          "Built with FastAPI, PostgreSQL 17, pgvector, React 19 and Docker.",
+        ],
+        link: "https://markpoint.app/" },
+      { title: "Multi-Agent Educational Content Generation", photo: "/pic/projects/cliffton-multi-agent.jpg", description: "A multi-agent pipeline that turns a topic into notes, flashcards, a narrated video and PDFs.",
+        details: [
+          "Self-initiated as a UROP. Implemented ThreadPoolExecutor and Vertex AI ADK behind one interface to compare concurrency models, with a FastAPI backend and 298 automated tests.",
+          "The front end is deployed. Backend hosting is still in progress.",
+        ],
+        link: "https://parallel-ai-agents.vercel.app/" },
     ] },
   { name: "Brian Wong", photo: "/pic/Brian.jpg", role: "Project Manager, UI/UX", major: "CSD", overviewRole: "Product Manager, AI Engineer, UI/UX", line: "Keeps the schedule honest and the operator interface usable.", chips: ["Delivery", "Interface design", "Stakeholder comms"],
     stack: ["Figma", "Web HMI", "MQTT"],

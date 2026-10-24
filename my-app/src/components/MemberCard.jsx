@@ -97,6 +97,13 @@ export default function MemberCard({ active, left, order }) {
               </span>
             ))}
           </div>
+
+          {m.website && (
+            <a href={m.website} target="_blank" rel="noreferrer" style={{
+              ...caption, display: "inline-block", marginTop: 14, color: C.signal,
+              textDecoration: "underline", textUnderlineOffset: 3,
+            }}>{m.website.replace(/^https?:\/\//, "").replace(/\/$/, "")} ↗</a>
+          )}
         </div>
       </motion.div>
     </div>
