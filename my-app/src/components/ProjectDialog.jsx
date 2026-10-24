@@ -263,6 +263,12 @@ export default function ProjectDialog({ project, originRect, onClose }) {
                       color: C.dim, margin: 0,
                     }}>{text}</p>
                   ))}
+                  {shown.link && (
+                    <a href={shown.link} target="_blank" rel="noreferrer" style={{
+                      ...caption, color: C.signal, textDecoration: "underline",
+                      textUnderlineOffset: 3, justifySelf: "start",
+                    }}>{shown.link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} ↗</a>
+                  )}
                 </div>
               </motion.div>
             </div>

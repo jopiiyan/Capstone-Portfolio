@@ -10,6 +10,10 @@ import { MEMBERS } from "../data.js";
 import { useActiveMember } from "../hooks/useActiveMember.js";
 import { useScrollSnap } from "../hooks/useScrollSnap.js";
 
+// The screens rendered below, Hero through Contact. Hero's title block reads
+// "Sheet 1 of SHEETS", so keep this in step when a section is added or dropped.
+const SHEETS = 6;
+
 /**
  * Tab 2 — the original single-page site, unchanged in order or logic.
  *
@@ -39,7 +43,7 @@ export default function TeamProjectsTab({ teamName, snapScroll }) {
     <>
       <ArmCanvas axisRef={axisRef} />
 
-      <Hero axisRef={axisRef} teamName={teamName} />
+      <Hero axisRef={axisRef} teamName={teamName} sheets={SHEETS} />
       <MeetTheTeam onAdvance={goToShowcase} />
       <TeamStage active={active} railRef={railRef} goTo={goTo} />
       <Capabilities />

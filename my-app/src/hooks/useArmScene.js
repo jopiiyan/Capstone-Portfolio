@@ -108,7 +108,10 @@ export function useArmScene(canvasRef, axisRef, ambientOnly = false) {
     const draw = (now) => {
       raf = requestAnimationFrame(draw);
       if (!ctx || !box) return;
-      const t = (now - t0) / 1000;
+      // rAF hands over the frame's start time, which can predate t0 on the
+      // first frame. A negative t sends the gripper pulse radius below zero
+      // and ctx.arc throws.
+      const t = Math.max(0, (now - t0) / 1000);
       fadeNow = fadeNow == null ? fadeRef.current : fadeNow + (fadeRef.current - fadeNow) * 0.08;
       burstNow = burstNow == null ? burstRef.current : burstNow + (burstRef.current - burstNow) * 0.12;
       travelNow = travelNow == null ? travelRef.current : travelNow + (travelRef.current - travelNow) * 0.12;

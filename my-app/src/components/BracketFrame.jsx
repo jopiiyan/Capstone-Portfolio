@@ -13,7 +13,7 @@ const CORNERS = [
   { pos: { bottom: 0, right: 0 }, origin: "bottom right", border: { borderRight: B, borderBottom: B }, brk: 0.36 },
 ];
 
-export default function BracketFrame({ teamName }) {
+export default function BracketFrame({ teamName, sheets }) {
   return (
     <div style={{ position: "absolute", inset: "104px 30px 30px", pointerEvents: "none" }}>
       {CORNERS.map((c, i) => (
@@ -34,7 +34,7 @@ export default function BracketFrame({ teamName }) {
         ...caption, fontSize: 13,
       }}>
         <span style={{ padding: "6px 10px", borderRight: `1px solid ${C.faint}`, color: C.paper }}>{teamName}</span>
-        <span style={{ padding: "6px 10px" }}>Sheet 1 of 5</span>
+        <span style={{ padding: "6px 10px" }}>Sheet 1 of {sheets}</span>
       </div>
     </div>
   );
