@@ -1,10 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
+import DesignLab from './demos/DesignLab.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App teamName="Capstone Team" snapScroll />
+    <DesignLab />
   </StrictMode>,
 )
