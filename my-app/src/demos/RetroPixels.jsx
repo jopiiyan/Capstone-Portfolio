@@ -128,14 +128,64 @@ const SCULPTURE_PARTICLES = makeSculptures(false);
 
 export function PixelSculpture({ kind = 0, className = '' }) {
   const ref = useRef(null);
+  const reduced = useMotionPreference();
   useEffect(() => {
     const node = ref.current;
+    const group = node.querySelector('.sculpture-particles');
+    const pixels = [...group.children];
+    let frame = 0;
+    let visible = false;
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      pixels.forEach(pixel => { pixel.style.transform = ''; });
+    };
+    const move = event => {
+      if (!visible || reduced || event.pointerType === 'touch') return;
+      cancelAnimationFrame(frame);
+      const { clientX, clientY } = event;
+      frame = requestAnimationFrame(() => {
+        const matrix = group.getScreenCTM();
+        if (!matrix) return;
+        const bounds = node.getBoundingClientRect();
+        const reach = Math.max(65, Math.min(110, bounds.width * .65));
+        if (clientX < bounds.left - reach || clientX > bounds.right + reach || clientY < bounds.top - reach || clientY > bounds.bottom + reach) { reset(); return; }
+        const inverse = matrix.inverse();
+        pixels.forEach(pixel => {
+          const x = Number(pixel.getAttribute('x')) + 4;
+          const y = Number(pixel.getAttribute('y')) + 4;
+          const point = new DOMPoint(x, y).matrixTransform(matrix);
+          const dx = point.x - clientX, dy = point.y - clientY;
+          const distance = Math.hypot(dx, dy);
+          if (distance >= reach) { pixel.style.transform = ''; return; }
+          const strength = (1 - distance / reach) ** 2 * 28;
+          const screenX = dx / Math.max(distance, 1) * strength;
+          const screenY = dy / Math.max(distance, 1) * strength;
+          const localX = inverse.a * screenX + inverse.c * screenY;
+          const localY = inverse.b * screenX + inverse.d * screenY;
+          pixel.style.transform = `translate(${localX}px, ${localY}px)`;
+        });
+      });
+    };
     const observer = new IntersectionObserver(entries => {
-      node.style.setProperty('--sculpture-play-state', entries[0].isIntersecting ? 'running' : 'paused');
+      visible = entries[0].isIntersecting;
+      node.style.setProperty('--sculpture-play-state', visible ? 'running' : 'paused');
+      if (!visible) reset();
     }, { rootMargin: '60px' });
     observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+    if (!reduced) {
+      window.addEventListener('pointermove', move, { passive: true });
+      document.documentElement.addEventListener('pointerleave', reset);
+      window.addEventListener('scroll', reset, { passive: true });
+    }
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('pointermove', move);
+      document.documentElement.removeEventListener('pointerleave', reset);
+      window.removeEventListener('scroll', reset);
+      reset();
+    };
+  }, [reduced]);
   return <span ref={ref} className={`retro-decoration sculpture-${kind} ${className}`} aria-hidden="true"><svg width="180" height="180" viewBox="-85 -85 170 170"><g className="sculpture-particles">{SCULPTURE_PARTICLES.filter(particle => particle.group === kind).map((particle,index) => <rect key={index} x={particle.x-4} y={particle.y-4} width="8" height="8" fill={COLORS[kind]} opacity={particle.random > .84 ? .6 : 1} />)}</g></svg></span>;
 }
 
@@ -205,4 +255,36 @@ export function PixelCardIcon({ icon }) {
       <g key={part} className={`icon-part ${part}`} style={{ '--pixel-delay': `${Number(part.split('-').at(-1)) * 55 || 0}ms` }}>{pixels}</g>
     )}</g></svg>
   </span>;
+}
+
+const WRENCH_PIXELS = [
+  '....##....##....', '...###....###...', '..####....####..', '..####....####..',
+  '..############..', '...##########...', '....########....', '......####......',
+  '......####......', '......####......', '......####......', '......####......',
+  '......####......', '.....######.....', '.....##..##.....', '.....######.....',
+];
+
+export function PixelDisciplineIcon({ major }) {
+  const cell = (x, y, key) => <rect key={key ?? `${x}-${y}`} x={x * 6} y={y * 6} width="5.4" height="5.4" />;
+  let drawing;
+  if (major === 'CSD') {
+    const frame = [], code = [], cursor = [];
+    for (let y = 2; y < 15; y++) for (let x = 0; x < 16; x++) {
+      if ((y <= 11 && x >= 2 && x <= 13 && (y === 2 || y === 11 || x === 2 || x === 13)) || (y === 13 && x >= 1 && x <= 14) || y === 14) frame.push(cell(x,y));
+      if ((y === 5 && x >= 4 && x <= 8) || (y === 7 && x >= 4 && x <= 10)) code.push(cell(x,y));
+      if (y === 9 && x === 4) cursor.push(cell(x,y));
+    }
+    drawing = <><g>{frame}</g><g className="discipline-code">{code}</g><g className="discipline-cursor">{cursor}</g></>;
+  } else if (major === 'EPD') {
+    drawing = <g className="discipline-wrench">{WRENCH_PIXELS.flatMap((row,y) => [...row].map((value,x) => value === '#' && cell(x,y)))}</g>;
+  } else {
+    drawing = [[5,1],[1,9],[9,9]].map(([left,top],index) => {
+      const pixels=[];
+      for(let y=0;y<6;y++) for(let x=0;x<6;x++) {
+        if(x===0||x===5||y===0||y===5||((x===2||x===3)&&y<3)) pixels.push(cell(left+x,top+y));
+      }
+      return <g className={`discipline-box discipline-box-${index}`} key={index}>{pixels}</g>;
+    });
+  }
+  return <span className={`discipline-icon discipline-icon-${major}`} aria-hidden="true"><svg viewBox="-6 -6 108 108">{drawing}</svg></span>;
 }
