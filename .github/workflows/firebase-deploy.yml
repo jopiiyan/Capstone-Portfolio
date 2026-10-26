@@ -1,0 +1,32 @@
+# Builds the site and deploys it to Firebase Hosting on every push to main.
+# Needs the FIREBASE_SERVICE_ACCOUNT repo secret (a service account key JSON).
+# The project ID comes from .firebaserc.
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: my-app/package-lock.json
+
+      - name: Build
+        working-directory: my-app
+        run: |
+          npm ci
+          npm run build
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live

@@ -1,0 +1,3 @@
+# Firebase CLI cache and debug logs
+.firebase/
+firebase-debug.log
