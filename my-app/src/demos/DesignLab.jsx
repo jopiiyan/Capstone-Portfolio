@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { MEMBERS } from './content.js';
-import { PixelDisciplineIcon, PixelCardIcon, PixelGlyph, PixelSculpture, RetroPixels } from './RetroPixels.jsx';
+import { PixelDataIcon, PixelDisciplineIcon, PixelCardIcon, PixelGlyph, PixelSculpture, RetroPixels } from './RetroPixels.jsx';
 import './design-lab.css';
 import './retro-refresh.css';
 import RetroProjectCarousel from './RetroProjectCarousel.jsx';
@@ -109,6 +109,20 @@ function RetroHero() {
   </section>;
 }
 
+function ProjectDirectionSection() {
+  const steps = [
+    { title: 'Collect', body: 'Capture reliable measurements with hardware.', icon: 'sensor' },
+    { title: 'Interpret', body: 'Use software to turn the data into useful information.', icon: 'analysis' },
+    { title: 'Act', body: 'Support a decision or carry out a physical response.', icon: 'actuator' },
+    { title: 'Measure', body: 'Check the result and use it to improve the next step.', icon: 'gauge' },
+  ];
+  return <section className="project-direction content-width" aria-labelledby="project-direction-title">
+    <div className="section-heading"><div><span className="section-note">Our project direction</span><h2 className="section-title" id="project-direction-title">What we want<br />to work on</h2></div><div className="project-direction-intro"><p>We want to help you collect reliable data and turn it into useful information or practical actions.</p><ul><li>Hardware to capture measurements</li><li>Software to make sense of the data</li><li>A response informed by the findings</li></ul><p className="direction-team-note">We’re a newly formed team looking for one Capstone project. We’ll shape the scope around your company’s problem.</p></div></div>
+    <ol className="data-action-loop" aria-label="From data collection to action and feedback">{steps.map((step,index) => <li key={step.title}><PixelDataIcon icon={step.icon} /><h3>{step.title}</h3><p>{step.body}</p>{index < steps.length - 1 && <span className="data-loop-arrow" aria-hidden="true"><Arrow /></span>}</li>)}</ol>
+    <div className="data-loop-return"><svg viewBox="0 0 1000 36" preserveAspectRatio="none" aria-hidden="true"><path d="M980 2v12q0 12-12 12H32q-12 0-12-12V2m-7 8 7-8 7 8" /></svg><p>Measure the result, then use what we learn to improve the process.</p></div>
+  </section>;
+}
+
 function ToolsStackSection() {
   return <section className="tools-stack-section content-width" id="stack"><div className="section-heading"><div><PixelSculpture kind={2} className="decoration-heading" /><h2 className="section-title">Why Hepta</h2><h3 className="section-description">Our combined tools and stack</h3></div><p>Our toolkit covers application development, data analysis, electronics, and fabrication. Explore the capabilities and project examples below to see how we use it.</p></div><div className="combined-stack">{TOOL_GROUPS.map((group,index)=><article key={group.name}><PixelSculpture kind={(index + 3) % 7} className="decoration-stack" /><span className={`stack-marker stack-marker-${index}`} aria-hidden="true" /><PixelGlyph index={index} /><h3>{group.name}</h3><div className="stack-tools">{group.tools.map(tool=><span key={tool}>{tool}</span>)}</div></article>)}</div><a className="text-link" href="#team">Meet the team and browse our projects <Arrow /></a></section>;
 }
@@ -170,7 +184,7 @@ function DetailDialog({ selection, onClose }) {
   const member = selection?.member;
   const project = selection?.project;
   return <dialog className="detail-dialog" ref={ref} aria-labelledby="detail-title" onCancel={onClose} onClose={onClose} onClick={event => { if (event.target === ref.current) onClose(); }}>
-    {member && <><button className="dialog-close" onClick={onClose} aria-label="Close details">×</button><div className="dialog-content">{project ? <><span className="section-note">{member.name} / {member.role}</span><h2 id="detail-title">{project.title}</h2><ProjectDescription project={project} /></> : <><div className="profile-header"><img src={member.photo} alt={member.name} /><div><span className="section-note">{MAJORS.find(major => major.code === member.major)?.name}</span><h2 id="detail-title">{member.name}</h2><p className="profile-role">{member.role}</p><p>{member.line}</p></div></div><div className="profile-skills"><div><h3>Skills</h3><div>{member.chips.map(skill => <span key={skill} data-skill-tone={skillTone(skill)}>{skill}</span>)}</div></div><div><h3>Tools</h3><p>{member.stack.join(', ')}</p></div></div><div className="profile-projects"><h3>Projects and experience</h3>{member.projects.map(item => <details key={item.title}><summary><span><strong>{item.title}</strong><span>{item.description}</span></span><span className="expand-project" aria-hidden="true">+</span></summary><ProjectDescription project={item} /></details>)}</div>{member.website && <a className="text-link" href={member.website} target="_blank" rel="noreferrer">Personal portfolio <Arrow diagonal /></a>}</>}</div></>}
+    {member && <><button className="dialog-close" onClick={onClose} aria-label="Close details"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg></button><div className="dialog-content">{project ? <><span className="section-note">{member.name} / {member.role}</span><h2 id="detail-title">{project.title}</h2><ProjectDescription project={project} /></> : <><div className="profile-header"><img src={member.photo} alt={member.name} /><div><span className="section-note">{MAJORS.find(major => major.code === member.major)?.name}</span><h2 id="detail-title">{member.name}</h2><p className="profile-role">{member.role}</p><p>{member.line}</p></div></div><div className="profile-skills"><div><h3>Skills</h3><div>{member.chips.map(skill => <span key={skill} data-skill-tone={skillTone(skill)}>{skill}</span>)}</div></div><div><h3>Tools</h3><p>{member.stack.join(', ')}</p></div></div><div className="profile-projects"><h3>Projects and experience</h3>{member.projects.map(item => <details key={item.title}><summary><span><strong>{item.title}</strong><span>{item.description}</span></span><span className="expand-project" aria-hidden="true">+</span></summary><ProjectDescription project={item} /></details>)}</div>{member.website && <a className="text-link" href={member.website} target="_blank" rel="noreferrer">Personal portfolio <Arrow diagonal /></a>}</>}</div></>}
   </dialog>;
 }
 
@@ -187,5 +201,5 @@ export default function DesignLab() {
     }
     return () => { delete document.documentElement.dataset.demo; };
   }, []);
-  return <div className="demo-site retro"><a className="demo-skip" href="#capstone">Skip to content</a><Navigation /><main><RetroHero /><OfferSummary /><div id="capstone" className="programme-content"><PartnershipSection /><TimelineSection /><RequirementsSection /></div><div id="why-hepta" className="team-content"><ToolsStackSection /><ExpertiseSection onSelect={setSelection} /><TeamSection onSelect={setSelection} /></div></main><ContactSection /><DetailDialog selection={selection} onClose={closeDialog} /></div>;
+  return <div className="demo-site retro"><a className="demo-skip" href="#capstone">Skip to content</a><Navigation /><main><RetroHero /><OfferSummary /><div id="capstone" className="programme-content"><PartnershipSection /><TimelineSection /><RequirementsSection /></div><div id="why-hepta" className="team-content"><ToolsStackSection /><ProjectDirectionSection /><ExpertiseSection onSelect={setSelection} /><TeamSection onSelect={setSelection} /></div></main><ContactSection /><DetailDialog selection={selection} onClose={closeDialog} /></div>;
 }

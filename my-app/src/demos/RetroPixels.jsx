@@ -55,6 +55,7 @@ export function RetroPixels({ variant = 'sculptures' }) {
       const t=reduced?0:time/1000;
       context.clearRect(0,0,width,height);
       const scale=width/logicalWidth, vertical=height/logicalHeight;
+      const shapeScale=Math.min(scale,vertical);
       if(variant==='sculptures'||variant==='hero-field') {
         for(const particle of particles) {
           const {x,y,cx,cy,group,random}=particle;
@@ -67,12 +68,12 @@ export function RetroPixels({ variant = 'sculptures' }) {
           if(group===1) {px+=Math.sin(t*.75+y/35)*9;py+=Math.cos(t*.6+x/40)*6;}
           if(group===4) {const breath=1+.08*Math.sin(t*.8);px*=breath;py*=breath;}
           if(group===5) {px+=Math.sin(t*.8+y/14)*7;}
-          px=(cx+px+Math.sin(t*.35+group)*9)*scale;
-          py=(cy+py+Math.cos(t*.5+group*.8)*12)*vertical;
+          px=cx*scale+(px+Math.sin(t*.35+group)*9)*shapeScale;
+          py=cy*vertical+(py+Math.cos(t*.5+group*.8)*12)*shapeScale;
           const dx=px-pointer.x,dy=py-pointer.y,reach=Math.hypot(dx,dy);
           if(!reduced&&reach<100) {px+=dx*(1-reach/100)*.45;py+=dy*(1-reach/100)*.45;}
           context.fillStyle=particle.color;context.globalAlpha=random>.84?.55:1;
-          const size=Math.max(3,8*scale);
+          const size=Math.max(2,8*shapeScale);
           context.fillRect(px,py,size,size);
           if(random>.92){context.fillStyle='#31466c';context.globalAlpha=.12;context.fillRect(px+size*.6,py+size*.8,size,size);}
         }
@@ -287,4 +288,39 @@ export function PixelDisciplineIcon({ major }) {
     });
   }
   return <span className={`discipline-icon discipline-icon-${major}`} aria-hidden="true"><svg viewBox="-6 -6 108 108">{drawing}</svg></span>;
+}
+
+// Purpose-built data-cycle pictograms: only the working part moves on hover.
+export function PixelDataIcon({ icon }) {
+  const groups = {};
+  const pixel = (x, y, part = 'frame') => {
+    (groups[part] ??= []).push(<rect key={`${x}-${y}`} x={x * 6} y={y * 6} width="5.3" height="5.3" />);
+  };
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    if (icon === 'sensor') {
+      if (x >= 4 && x <= 11 && y >= 6 && y <= 13 && (x === 4 || x === 11 || y === 6 || y === 13)) pixel(x,y);
+      else if ((y === 7 || y === 10 || y === 12) && (x === 2 || x === 3 || x === 12 || x === 13)) pixel(x,y);
+      else if (x >= 6 && x <= 9 && y >= 8 && y <= 11) pixel(x,y,'sensor-core');
+      else if ((y === 3 && x >= 6 && x <= 9) || (y === 4 && (x === 5 || x === 10))) pixel(x,y,'signal-near');
+      else if ((y === 0 && x >= 5 && x <= 10) || (y === 1 && (x === 4 || x === 11)) || (y === 2 && (x === 3 || x === 12))) pixel(x,y,'signal-far');
+    } else if (icon === 'analysis') {
+      if ((x === 1 && y >= 2 && y <= 14) || (y === 14 && x >= 1 && x <= 14)) pixel(x,y);
+      else if (x >= 4 && x <= 5 && y >= 9 && y <= 12) pixel(x,y,'bar-one');
+      else if (x >= 8 && x <= 9 && y >= 6 && y <= 12) pixel(x,y,'bar-two');
+      else if (x >= 12 && x <= 13 && y >= 2 && y <= 12) pixel(x,y,'bar-three');
+    } else if (icon === 'actuator') {
+      if ((y === 4 || y === 11) && x >= 3 && x <= 12) pixel(x,y);
+      else if ((y === 5 || y === 10) && (x === 2 || x === 13)) pixel(x,y);
+      else if (y >= 6 && y <= 9 && (x === 1 || x === 14)) pixel(x,y);
+      else if (x >= 3 && x <= 6 && y >= 6 && y <= 9) pixel(x,y,'switch-knob');
+    } else {
+      const dx=x-7.5, dy=y-8;
+      const radius=Math.hypot(dx,dy);
+      if (radius >= 6 && radius <= 7 && y <= 10) pixel(x,y);
+      else if ((x === 7 || x === 8) && y >= 8 && y <= 9) pixel(x,y,'needle');
+      else if ((x === 9 && y === 7) || (x === 10 && y === 6) || (x === 11 && y === 5)) pixel(x,y,'needle');
+      else if ((y === 13 || y === 14) && x >= 4 && x <= 11) pixel(x,y);
+    }
+  }
+  return <span className={`pixel-data-icon pixel-data-${icon}`} aria-hidden="true"><svg viewBox="-6 -6 108 108">{Object.entries(groups).map(([part,pixels]) => <g key={part} className={`data-icon-${part}`}>{pixels}</g>)}</svg></span>;
 }
