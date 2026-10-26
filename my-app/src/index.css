@@ -1,8 +1,6 @@
 /* Everything from the design's <style> block except the @keyframes — all
    fourteen of those now live in framer-motion (see src/motion/presets.js). */
 :root {
-  color-scheme: dark;
-
   --surface: #1E2430;
   --canvas: #12151A;
   --accent: #38BDF8;
