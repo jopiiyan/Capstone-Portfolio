@@ -1,7 +1,6 @@
 import MemberCard from "./MemberCard.jsx";
 import ProjectPanel from "./ProjectPanel.jsx";
 import RosterDots from "./RosterDots.jsx";
-import StageLines from "./StageLines.jsx";
 import { MEMBERS } from "../data.js";
 
 /**
@@ -18,8 +17,6 @@ export default function TeamStage({ active, railRef, goTo }) {
         position: "sticky", top: 0, height: "100vh", zIndex: 1, overflow: "hidden",
         display: "grid", alignContent: "center", padding: "clamp(80px, 11vh, 110px) 36px 40px",
       }}>
-        <StageLines active={active} left={left} />
-
         <div className="stage-grid" style={{
           position: "relative", display: "grid",
           // Widths follow the columns as they swap, so the member side is always 0.95fr.

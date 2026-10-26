@@ -1,16 +1,43 @@
 /* Everything from the design's <style> block except the @keyframes — all
    fourteen of those now live in framer-motion (see src/motion/presets.js). */
+:root {
+  color-scheme: dark;
+
+  --surface: #1E2430;
+  --canvas: #12151A;
+  --accent: #38BDF8;
+  --text: #F8FAFC;
+  --line: #94A3B8;
+  --dim: #7C8AA0;
+  --faint: #2A3242;
+
+  /* The CTA colour tracks the palette's accent. --signal-deep is the cap on
+     hover, --signal-side the housing it sits proud of (and the unlit
+     indicator lamp), and --signal-rgb the same colour as bare channels for
+     the hero button's glow — see hooks/useSignalRgb.js for why that exists. */
+  --signal: var(--accent);
+  --signal-deep: #7DD3FC;
+  --signal-side: #0C4A6E;
+  --signal-rgb: 56, 189, 248;
+  --on-signal: #0F172A;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 h1, h2, h3 { font-family: 'Big Shoulders Display', 'Arial Narrow', ui-sans-serif, sans-serif; }
-html { scroll-behavior: smooth; background: #000000; }
+html { scroll-behavior: smooth; background: var(--canvas); }
 body {
-  margin: 0; background: #000000; color: #EFEADF;
+  margin: 0; background: var(--canvas); color: var(--text);
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
-a { color: #F2B705; text-decoration: none; }
-a:hover { color: #EFEADF; }
-::selection { background: rgba(157, 187, 162, 0.4); }
-:focus-visible { outline: 2px solid #F2B705; outline-offset: 3px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--text); }
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* The supplied SUTD mark is dark ink for light backgrounds; the page is dark,
+   so it has to be flipped to read. Swap in the official light lockup if you
+   have one. */
+.sutd-logo { filter: brightness(0) invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -32,4 +59,18 @@ a:hover { color: #EFEADF; }
     justify-content: flex-start !important; flex-direction: row !important;
   }
   .member-right [data-mirror-col] { align-items: flex-start !important; }
+
+  /* Overview tab. The timeline drops its spine and stacks into one column;
+     the tab control has to survive here, so it just gets tighter. */
+  .tl-row { grid-template-columns: minmax(0, 1fr) !important; gap: 0 !important; }
+  .tl-card { grid-column: 1 !important; }
+  .tl-line, .tl-node { display: none !important; }
+  .roster-grid, .card-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .tabs { gap: 16px !important; }
+  .tabs button { font-size: 14px !important; }
 }
+
+/* The detail sheet's write-up scrolls on its own, under a header that does not.
+   macOS overlay scrollbars are invisible at rest, so say it in the gutter. */
+.dialog-prose { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+

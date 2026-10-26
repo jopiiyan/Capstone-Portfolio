@@ -22,7 +22,7 @@ export default function Contact({ teamName }) {
             Tell us where the line slows down, what fails inspection, or what still runs by hand.
             We will scope it, build it, and hand it over working.
           </p>
-          <PushButton href="mailto:team@example.edu">team@example.edu</PushButton>
+          <PushButton href="mailto:capstoneprojectt28@gmail.com">capstoneprojectt28@gmail.com</PushButton>
         </div>
 
         <div>

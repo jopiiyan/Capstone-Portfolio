@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import ImageSlot from "./ImageSlot.jsx";
-import { C, displayH } from "../theme.js";
+import { C, RADIUS, displayH } from "../theme.js";
 
 const SHADOW_REST = "0 0 0 0 rgba(0,0,0,0), 0 0 0 1px rgba(0,0,0,0)";
 const SHADOW_LIFT = `0 24px 48px rgba(0,0,0,0.6), 0 0 0 1px ${C.line}`;
@@ -25,10 +25,15 @@ export default function ProjectCard({ title, photo, active = true }) {
       style={{
         height: "100%", display: "grid", gridTemplateRows: "minmax(0, 1fr) auto",
         // Side cards get the green frame so their outline still reads through the dimming.
-        background: C.ink, border: `1px solid ${active ? C.faint : C.line}`, transformStyle: "preserve-3d",
+        background: C.ink, border: `1px solid ${active ? C.faint : C.line}`,
+        borderRadius: RADIUS, transformStyle: "preserve-3d",
       }}
     >
-      <ImageSlot src={photo || undefined} alt={title} placeholder="Project photo" />
+      {/* data-project-photo: the carousel measures this box to fly the detail
+          sheet out of the thumbnail the visitor pressed. */}
+      <div data-project-photo style={{ minHeight: 0 }}>
+        <ImageSlot src={photo || undefined} alt={title} placeholder="Project photo" />
+      </div>
       <div style={{ padding: "12px 14px", borderTop: `1px solid ${C.faint}` }}>
         <h3 style={{
           ...displayH, fontSize: "clamp(24px, min(3vw, 4.4vh), 40px)", lineHeight: 0.95,

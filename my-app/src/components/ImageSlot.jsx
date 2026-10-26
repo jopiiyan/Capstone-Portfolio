@@ -12,8 +12,11 @@ const TICKS = [
 /**
  * Stand-in for the design's <image-slot> web component. Fills its container.
  * Empty slots read as a framed opening on a drawing: faint fill, green corner ticks.
+ *
+ * `fit` is the image's object-fit: "cover" crops to fill the frame (cards),
+ * "contain" shows the whole photo (the detail sheet, where it is the subject).
  */
-export default function ImageSlot({ src, alt, placeholder = "Drop an image" }) {
+export default function ImageSlot({ src, alt, placeholder = "Drop an image", fit = "cover" }) {
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <div style={{
@@ -22,7 +25,7 @@ export default function ImageSlot({ src, alt, placeholder = "Drop an image" }) {
       }}>
         {src && (
           <img src={src} alt={alt ?? placeholder}
-               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+               style={{ width: "100%", height: "100%", objectFit: fit, display: "block" }} />
         )}
         {!src && (
           <div style={{
